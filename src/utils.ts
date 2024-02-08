@@ -1,3 +1,5 @@
+/* eslint-disable ts/no-require-imports */
+/* eslint-disable ts/no-var-requires */
 import fs from 'node:fs'
 import path from 'node:path'
 import { workspace } from 'vscode'
@@ -5,7 +7,7 @@ import { workspace } from 'vscode'
 export function getClassNames(
   targetText: string,
 ) {
-  const arr: Array<{ start: number; value: string }> = []
+  const arr: Array<{ start: number, value: string }> = []
 
   const regexes = [
     /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{([^>}]+)})|(["'`][^"'`]+["'`])))/,
@@ -45,7 +47,7 @@ const defaultConfigFiles = [
 export function isValidClassName(
   className: string,
 ) {
-  const workspacePath = workspace.workspaceFolders?.[0].uri.fsPath
+  const workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath
   if (!workspacePath)
     return
 
