@@ -214,5 +214,33 @@ describe('should', () => {
         },
       ]
     `)
+
+    expect(getClassNames(dedent`
+      <div
+        className={cn(
+          "size-8",
+          list.length > 2 && "size-16",
+          list.length > 6 && "size-24",
+          className,
+        )}
+      >
+        {list.length}
+      </div>
+    `)).toMatchInlineSnapshot(`
+      [
+        {
+          "start": 27,
+          "value": "size-8",
+        },
+        {
+          "start": 60,
+          "value": "size-16",
+        },
+        {
+          "start": 94,
+          "value": "size-24",
+        },
+      ]
+    `)
   })
 })
