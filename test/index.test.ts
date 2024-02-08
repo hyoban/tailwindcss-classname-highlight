@@ -189,5 +189,30 @@ describe('should', () => {
         },
       ]
     `)
+
+    expect(getClassNames(dedent`
+      <Link
+        className="py-4 px-8
+        hover:text-white"
+        target="_blank"
+      >
+        了解更多
+      </Link>
+    `)).toMatchInlineSnapshot(`
+      [
+        {
+          "start": 19,
+          "value": "py-4",
+        },
+        {
+          "start": 24,
+          "value": "px-8",
+        },
+        {
+          "start": 31,
+          "value": "hover:text-white",
+        },
+      ]
+    `)
   })
 })
