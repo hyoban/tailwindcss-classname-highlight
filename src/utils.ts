@@ -1,9 +1,3 @@
-/* eslint-disable ts/no-require-imports */
-/* eslint-disable ts/no-var-requires */
-import fs from 'node:fs'
-import path from 'node:path'
-import { workspace } from 'vscode'
-
 export function getClassNames(
   targetText: string,
 ) {
@@ -35,53 +29,4 @@ export function getClassNames(
     }
   }
   return arr
-}
-
-const defaultConfigFiles = [
-  './tailwind.config.js',
-  './tailwind.config.cjs',
-  './tailwind.config.mjs',
-  './tailwind.config.ts',
-]
-
-export function isValidClassName(
-  className: string,
-) {
-  const workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath
-  if (!workspacePath)
-    return
-
-  const { generateRules } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
-  const { createContext } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
-  const { loadConfig } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/load-config.js`)
-  const resolveConfig = require(`${workspacePath}/node_modules/tailwindcss/resolveConfig.js`)
-
-  let configPath: string | null = null
-
-  for (const configFile of defaultConfigFiles) {
-    try {
-      const fullPath = path.join(workspacePath, configFile)
-      if (fs.existsSync(fullPath))
-        configPath = fullPath
-    }
-    catch {
-
-    }
-  }
-
-  function isValidClassName(className: string | string[], context: any) {
-    const candidate = Array.isArray(className)
-      ? className
-      : typeof className === 'string'
-        ? className.split(' ')
-        : []
-
-    const gen = generateRules(candidate, context)
-    return gen.length !== 0
-  }
-
-  return isValidClassName(
-    className,
-    createContext(resolveConfig(loadConfig(configPath))),
-  )
 }
