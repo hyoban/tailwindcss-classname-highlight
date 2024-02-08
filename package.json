@@ -4,7 +4,7 @@
   "displayName": "Tailwindcss ClassName Highlight",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@8.10.5",
+  "packageManager": "pnpm@8.15.1",
   "description": "",
   "author": "Stephen Zhou <hi@hyoban.cc>",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "dist"
   ],
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.86.0"
   },
   "activationEvents": [
     "onStartupFinished"
@@ -45,19 +45,19 @@
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^1.1.1",
-    "@antfu/ni": "^0.21.9",
-    "@types/node": "^20.9.0",
-    "@types/vscode": "^1.84.1",
-    "@vscode/vsce": "^2.22.0",
-    "bumpp": "^9.2.0",
-    "eslint": "^8.53.0",
+    "@antfu/eslint-config": "^1.2.1",
+    "@antfu/ni": "^0.21.12",
+    "@types/node": "^20.11.16",
+    "@types/vscode": "^1.86.0",
+    "@vscode/vsce": "^2.23.0",
+    "bumpp": "^9.3.0",
+    "eslint": "^8.56.0",
     "esno": "^4.0.0",
-    "pnpm": "^8.10.5",
+    "pnpm": "^8.15.1",
     "rimraf": "^5.0.5",
-    "tsup": "^7.2.0",
-    "typescript": "^5.2.2",
-    "vite": "^4.5.0",
-    "vitest": "^0.34.6"
+    "tsup": "^7.3.0",
+    "typescript": "^5.3.3",
+    "vite": "^4.5.2",
+    "vitest": "^1.2.2"
   }
 }
