@@ -19,10 +19,12 @@ export function getClassNames(
 
         let start = classNameMatch.index! + stringMatch.index! + 1
         for (const value of stringMatch[0].split(' ')) {
-          arr.push({
-            start,
-            value,
-          })
+          if (value.trim()) {
+            arr.push({
+              start,
+              value: value.trim(),
+            })
+          }
           start += value.length + 1
         }
       }
