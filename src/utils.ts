@@ -11,7 +11,7 @@ export function getClassNames(
   const classNameMatches = targetText.matchAll(regex)
   for (const classNameMatch of classNameMatches) {
     const stringMatches = classNameMatch[0].matchAll(
-      /(\".+?\"|\'.+?\'|\`(?:.|\n)+?\`)/g,
+      /(\".*?\"|\'.*?\'|\`(?:.|\n)*?\`)/g,
     )
     for (const stringMatch of stringMatches) {
       if (classNameMatch.index != null && stringMatch.index != null) {
