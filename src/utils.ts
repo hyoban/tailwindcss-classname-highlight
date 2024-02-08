@@ -5,13 +5,13 @@ export function getClassNames(
 
   const regexes = [
     /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{([^>}]+)})|(["'`][^"'`]+["'`])))/,
-    /(?:(clsx|classnames)\()([^)]+)\)/,
+    /(?:(clsx|classnames|cva)\()([^)]+)\)/,
   ]
   const regex = new RegExp(regexes.map(r => r.source).join('|'), 'gm')
   const classNameMatches = targetText.matchAll(regex)
   for (const classNameMatch of classNameMatches) {
     const stringMatches = classNameMatch[0].matchAll(
-      /(?:["'`]([\s\S.:/${}()[\]"']+)["'`])/g,
+      /(\".*\"|\'.*\')/g,
     )
     for (const stringMatch of stringMatches) {
       if (classNameMatch.index != null && stringMatch.index != null) {
