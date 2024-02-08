@@ -54,7 +54,7 @@ export function isValidClassName(
   const { generateRules } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
   const { createContext } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
   const { loadConfig } = require(`${workspacePath}/node_modules/tailwindcss/lib/lib/load-config.js`)
-  const resolveConfig = require('tailwindcss/resolveConfig.js')
+  const resolveConfig = require(`${workspacePath}/node_modules/tailwindcss/resolveConfig.js`)
 
   let configPath: string | null = null
 
