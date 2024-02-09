@@ -1,3 +1,10 @@
+const ignoredValues = [
+  '?',
+  ':',
+  '{',
+  '}',
+]
+
 export function getClassNames(
   targetText: string,
   classRegex: Array<RegExp> = [],
@@ -17,14 +24,13 @@ export function getClassNames(
     )
     for (const stringMatch of stringMatches) {
       if (classNameMatch.index != null && stringMatch.index != null) {
-        stringMatch[0] = stringMatch[0].replace(/["'`]/g, '')
-
-        let start = classNameMatch.index! + stringMatch.index! + 1
-        for (const value of stringMatch[0].split(' ')) {
+        let start = classNameMatch.index! + stringMatch.index!
+        for (const value of stringMatch[0].split(/[ "'`]/g)) {
           const trimmedValue = value.trim()
-          if (trimmedValue
-            // check if value contains a variable
-            && !/\$\{[^}]+\}/.test(trimmedValue)
+          if (
+            trimmedValue
+            && !trimmedValue.includes('${')
+            && !ignoredValues.includes(trimmedValue)
           ) {
             arr.push({
               start,

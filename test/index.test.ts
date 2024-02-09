@@ -314,5 +314,59 @@ describe('should', () => {
         },
       ]
     `)
+
+    expect(getClassNames(dedent`
+      <div
+        className={cn(
+          \`\${isMobileLayout ? "pt-16 flex-1" : "flex-1 min-w-0"}\`,
+          "bg-white w-full h-full lg:rounded-xl lg:drop-shadow overflow-y-auto",
+        )}
+      >
+        {children}
+      </div>
+    `)).toMatchInlineSnapshot(`
+      [
+        {
+          "start": 47,
+          "value": "pt-16",
+        },
+        {
+          "start": 53,
+          "value": "flex-1",
+        },
+        {
+          "start": 64,
+          "value": "flex-1",
+        },
+        {
+          "start": 71,
+          "value": "min-w-0",
+        },
+        {
+          "start": 88,
+          "value": "bg-white",
+        },
+        {
+          "start": 97,
+          "value": "w-full",
+        },
+        {
+          "start": 104,
+          "value": "h-full",
+        },
+        {
+          "start": 111,
+          "value": "lg:rounded-xl",
+        },
+        {
+          "start": 125,
+          "value": "lg:drop-shadow",
+        },
+        {
+          "start": 140,
+          "value": "overflow-y-auto",
+        },
+      ]
+    `)
   })
 })
