@@ -272,5 +272,47 @@ describe('should', () => {
         },
       ]
     `)
+
+    expect(getClassNames(dedent`
+      <main
+        // eslint-disable-next-line tailwindcss/no-custom-classname
+        className={cn(
+          \`xlog-post-id-\${page?.characterId}-\${page?.noteId}\`,
+          "xlog-deprecated-class xlog-post-area max-w-screen-md mx-auto px-5 pt-12 relative",
+        )}
+      >
+      </main>
+    `)).toMatchInlineSnapshot(`
+      [
+        {
+          "start": 147,
+          "value": "xlog-deprecated-class",
+        },
+        {
+          "start": 169,
+          "value": "xlog-post-area",
+        },
+        {
+          "start": 184,
+          "value": "max-w-screen-md",
+        },
+        {
+          "start": 200,
+          "value": "mx-auto",
+        },
+        {
+          "start": 208,
+          "value": "px-5",
+        },
+        {
+          "start": 213,
+          "value": "pt-12",
+        },
+        {
+          "start": 219,
+          "value": "relative",
+        },
+      ]
+    `)
   })
 })

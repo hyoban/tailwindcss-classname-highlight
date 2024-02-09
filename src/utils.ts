@@ -5,7 +5,7 @@ export function getClassNames(
   const arr: Array<{ start: number, value: string }> = []
 
   const regexes = [
-    /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{((?:.|\n)+?)}(?!.*}))|(["'`][^"'`]+["'`])))/,
+    /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{((?:.|\n)+?)(?<=["'`)]\s*)(?<!\${[^}]*)})|(["'`][^"'`]+["'`])))/,
     /(?:(clsx|classnames|cva)\()([^)]+)\)/,
     ...classRegex,
   ]
