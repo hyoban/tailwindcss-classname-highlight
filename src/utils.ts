@@ -5,7 +5,7 @@ export function getClassNames(
   const arr: Array<{ start: number, value: string }> = []
 
   const regexes = [
-    /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{([^}]+)})|(["'`][^"'`]+["'`])))/,
+    /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{((?:.|\n)+?)}(?!.*}))|(["'`][^"'`]+["'`])))/,
     /(?:(clsx|classnames|cva)\()([^)]+)\)/,
     ...classRegex,
   ]
@@ -21,10 +21,14 @@ export function getClassNames(
 
         let start = classNameMatch.index! + stringMatch.index! + 1
         for (const value of stringMatch[0].split(' ')) {
-          if (value.trim()) {
+          const trimmedValue = value.trim()
+          if (trimmedValue
+            // check if value contains a variable
+            && !/\$\{[^}]+\}/.test(trimmedValue)
+          ) {
             arr.push({
               start,
-              value: value.trim(),
+              value: trimmedValue,
             })
           }
           start += value.length + 1

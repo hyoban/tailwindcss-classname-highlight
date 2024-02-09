@@ -242,5 +242,35 @@ describe('should', () => {
         },
       ]
     `)
+
+    expect(getClassNames(dedent`
+      <div
+        className={\`h-20 w-[1px] bg-gradient-to-b mx-auto text-feature-\${feature.title.toLocaleLowerCase()}\`}
+        style={
+          {
+            "--tw-gradient-from": "transparent",
+          } as any
+        }
+      ></div>
+    `)).toMatchInlineSnapshot(`
+      [
+        {
+          "start": 19,
+          "value": "h-20",
+        },
+        {
+          "start": 24,
+          "value": "w-[1px]",
+        },
+        {
+          "start": 32,
+          "value": "bg-gradient-to-b",
+        },
+        {
+          "start": 49,
+          "value": "mx-auto",
+        },
+      ]
+    `)
   })
 })
