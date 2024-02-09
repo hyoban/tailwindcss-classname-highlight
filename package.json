@@ -25,7 +25,7 @@
     "dist"
   ],
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": "^1.84.0"
   },
   "activationEvents": [
     "onStartupFinished"
@@ -60,7 +60,7 @@
     "@antfu/eslint-config": "^1.2.1",
     "@antfu/ni": "^0.21.12",
     "@types/node": "^20.11.16",
-    "@types/vscode": "^1.86.0",
+    "@types/vscode": "^1.84.0",
     "@vscode/vsce": "^2.23.0",
     "bumpp": "^9.3.0",
     "dedent": "^1.5.1",
