@@ -24,15 +24,27 @@ export class Decoration {
   tailwindConfigPath: string = ''
   tailwindContext: any
   isValidClassNameCache: Map<string, boolean> = new Map()
+  classRegex: Array<RegExp> = []
 
   constructor() {
     this.workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
     if (!this.workspacePath)
       throw new Error('No workspace found')
 
+    this.updateCustomRegExps()
+    workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('tailwindcss-classname-highlight.classRegex'))
+        this.updateCustomRegExps()
+    })
+
     this.updateTailwindConfigPath()
     this.updateTailwindContext()
     this.setupFileWatcher()
+  }
+
+  private updateCustomRegExps() {
+    const config = workspace.getConfiguration().get('tailwindcss-classname-highlight.classRegex') as Array<string>
+    this.classRegex = config.map(r => new RegExp(r))
   }
 
   private updateTailwindConfigPath() {
@@ -99,7 +111,7 @@ export class Decoration {
       return
 
     const text = openEditor.document.getText()
-    const classNames = getClassNames(text)
+    const classNames = getClassNames(text, this.classRegex)
     const validClassNames = classNames.filter(({ value }) => this.isValidClassName(value))
     const decorations = validClassNames.map(({ start, value }) => ({
       range: new Range(

@@ -30,6 +30,18 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Tailwind CSS ClassName Highlight",
+      "properties": {
+        "tailwindcss-classname-highlight.classRegex": {
+          "type": "array",
+          "description": "The regex to match the tailwindcss classnames"
+        }
+      }
+    }
+  },
   "scripts": {
     "build": "tsup src/index.ts --external vscode",
     "dev": "nr build --watch",

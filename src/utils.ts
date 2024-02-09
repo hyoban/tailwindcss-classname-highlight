@@ -1,11 +1,12 @@
 export function getClassNames(
   targetText: string,
+  classRegex: Array<RegExp> = [],
 ) {
   const arr: Array<{ start: number, value: string }> = []
 
   const regexes = [
     /(?:\b(?:class(?:Name)?|tw)\s*=\s*(?:(?:{([^}]+)})|(["'`][^"'`]+["'`])))/,
-    /(?:(clsx|classnames|cva)\()([^)]+)\)/,
+    ...classRegex,
   ]
   const regex = new RegExp(regexes.map(r => r.source).join('|'), 'gm')
   const classNameMatches = targetText.matchAll(regex)
