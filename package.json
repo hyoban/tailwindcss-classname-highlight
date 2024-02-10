@@ -42,7 +42,7 @@
     "pack": "vsce package --no-dependencies",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "release": "bumpp && pnpm publish"
+    "release": "bumpp && pnpm run publish"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
