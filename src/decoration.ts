@@ -2,16 +2,9 @@
 /* eslint-disable ts/no-var-requires */
 import path from 'node:path'
 import fs from 'node:fs'
-import { Range, type TextEditor, window, workspace } from 'vscode'
+import * as vscode from 'vscode'
 import micromatch from 'micromatch'
 import fg from 'fast-glob'
-
-const decorationType = window.createTextEditorDecorationType({
-  // dashed underline
-  textDecoration: 'none; border-bottom: 1px dashed;',
-})
-
-export const logger = window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 
@@ -22,8 +15,20 @@ export class Decoration {
   tailwindContext: any
   tailwindLibPath: string = ''
 
-  constructor() {
-    this.workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
+  extContext: vscode.ExtensionContext
+  decorationType = vscode.window.createTextEditorDecorationType({
+    // dashed underline
+    textDecoration: 'none; border-bottom: 1px dashed;',
+  })
+
+  logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
+
+  constructor(extContext: vscode.ExtensionContext) {
+    this.extContext = extContext
+    this.extContext.subscriptions.push(this.decorationType)
+    this.extContext.subscriptions.push(this.logger)
+
+    this.workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
     if (!this.workspacePath)
       throw new Error('No workspace found')
 
@@ -47,7 +52,7 @@ export class Decoration {
       .map(p => path.join(this.workspacePath, p))
       .find(p => fs.existsSync(p))!
 
-    logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
+    this.logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
     this.tailwindConfigPath = configPath
     this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
   }
@@ -63,7 +68,7 @@ export class Decoration {
         this.tailwindLibPath = this.tailwindConfigFolderPath
       }
       catch {
-        logger.appendLine('Tailwind CSS library path not found, you may need to install Tailwind CSS in your workspace')
+        this.logger.appendLine('Tailwind CSS library path not found, you may need to install Tailwind CSS in your workspace')
         return false
       }
     }
@@ -72,7 +77,7 @@ export class Decoration {
 
   private updateTailwindContext() {
     const now = Date.now()
-    logger.appendLine('Updating Tailwind CSS context')
+    this.logger.appendLine('Updating Tailwind CSS context')
 
     delete require.cache[require.resolve(this.tailwindConfigPath)]
     const { createContext } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
@@ -80,18 +85,20 @@ export class Decoration {
     const resolveConfig = require(`${this.tailwindLibPath}/node_modules/tailwindcss/resolveConfig.js`)
     this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
 
-    logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
+    this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   private setupFileWatcher() {
-    workspace.createFileSystemWatcher(this.tailwindConfigPath)
-      .onDidChange(() => {
-        logger.appendLine('Tailwind CSS config file changed, trying to update context')
-        this.updateTailwindContext()
-      })
+    this.extContext.subscriptions.push(
+      vscode.workspace.createFileSystemWatcher(this.tailwindConfigPath)
+        .onDidChange(() => {
+          this.logger.appendLine('Tailwind CSS config file changed, trying to update context')
+          this.updateTailwindContext()
+        }),
+    )
   }
 
-  decorate(openEditor?: TextEditor | null | undefined) {
+  decorate(openEditor?: vscode.TextEditor | null | undefined) {
     if (!openEditor || !this.isFileMatched(openEditor.document.uri.fsPath))
       return
 
@@ -99,12 +106,12 @@ export class Decoration {
     const extracted = this.extract(text)
 
     const decorations = extracted.map(({ start, value }) => ({
-      range: new Range(
+      range: new vscode.Range(
         openEditor.document.positionAt(start),
         openEditor.document.positionAt(start + value.length),
       ),
     }))
-    openEditor.setDecorations(decorationType, decorations)
+    openEditor.setDecorations(this.decorationType, decorations)
   }
 
   private isFileMatched(filePath: string) {
@@ -148,12 +155,12 @@ export class Decoration {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
+      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
       return false
     }
 
     if (!this.tailwindContext) {
-      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
+      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
       return false
     }
 

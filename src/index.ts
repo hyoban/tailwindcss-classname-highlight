@@ -1,29 +1,31 @@
-import { window, workspace } from 'vscode'
-import { Decoration, logger } from './decoration'
+import * as vscode from 'vscode'
+import { Decoration } from './decoration'
 
-export async function activate() {
-  const decoration = new Decoration()
-  if (!decoration.checkContext()) {
-    logger.appendLine('Tailwind CSS ClassName Highlight deactivated due to context check failure')
+export async function activate(extContext: vscode.ExtensionContext) {
+  const decoration = new Decoration(extContext)
+  if (!decoration.checkContext())
     return
-  }
 
   const decorate = decoration.decorate.bind(decoration)
 
   // on activation
-  const openEditors = window.visibleTextEditors
+  const openEditors = vscode.window.visibleTextEditors
   openEditors.forEach(decorate)
 
   // on editor change
-  window.onDidChangeActiveTextEditor(decorate)
+  extContext.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(decorate),
+  )
 
   // on text editor change
-  workspace.onDidChangeTextDocument((event) => {
-    const openEditor = window.visibleTextEditors.find(
-      editor => editor.document.uri === event.document.uri,
-    )
-    decorate(openEditor)
-  })
+  extContext.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      const openEditor = vscode.window.visibleTextEditors.find(
+        editor => editor.document.uri === event.document.uri,
+      )
+      decorate(openEditor)
+    }),
+  )
 }
 
 export function deactivate() {
