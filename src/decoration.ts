@@ -7,6 +7,28 @@ import micromatch from 'micromatch'
 import fg from 'fast-glob'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
+const LIMITED_CACHE_SIZE = 50
+
+type GenerateRules = Array<[
+  Record<string, unknown>,
+  {
+    raws: {
+      tailwind: {
+        candidate: string
+      }
+    }
+  },
+]>
+
+interface NumberRange {
+  start: number
+  end: number
+}
+
+interface ExtractResult {
+  index: number
+  result: NumberRange[]
+}
 
 export class Decoration {
   workspacePath: string
@@ -15,12 +37,11 @@ export class Decoration {
   tailwindContext: any
   tailwindLibPath: string = ''
 
-  extContext: vscode.ExtensionContext
-  decorationType = vscode.window.createTextEditorDecorationType({
-    // dashed underline
-    textDecoration: 'none; border-bottom: 1px dashed;',
-  })
+  textContentHashCache: Array<[string, NumberRange[]]> = []
+  latestDecoratedHash: string = ''
 
+  extContext: vscode.ExtensionContext
+  decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
   logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
   constructor(extContext: vscode.ExtensionContext) {
@@ -103,15 +124,49 @@ export class Decoration {
       return
 
     const text = openEditor.document.getText()
-    const extracted = this.extract(text)
 
-    const decorations = extracted.map(({ start, value }) => ({
-      range: new vscode.Range(
-        openEditor.document.positionAt(start),
-        openEditor.document.positionAt(start + value.length),
-      ),
-    }))
-    openEditor.setDecorations(this.decorationType, decorations)
+    let crypto: typeof import('node:crypto') | undefined
+    try {
+      crypto = require('node:crypto')
+    }
+    catch (err) {
+    }
+
+    const currentTextContentHash = crypto
+      ? crypto.createHash('md5').update(text).digest('hex')
+      : ''
+
+    if (crypto) {
+      if (currentTextContentHash === this.latestDecoratedHash)
+        return
+      this.latestDecoratedHash = currentTextContentHash
+    }
+
+    let numberRange: NumberRange[] = []
+
+    if (crypto) {
+      const cached = this.textContentHashCache.find(([hash]) => hash === currentTextContentHash)
+      if (cached) {
+        numberRange = cached[1]
+      }
+      else {
+        numberRange = this.extract(text)
+        this.textContentHashCache.unshift([currentTextContentHash, numberRange])
+        this.textContentHashCache.length = Math.min(this.textContentHashCache.length, LIMITED_CACHE_SIZE)
+      }
+    }
+    else {
+      numberRange = this.extract(text)
+    }
+
+    openEditor.setDecorations(
+      this.decorationType,
+      numberRange
+        .map(({ start, end }) => new vscode.Range(
+          openEditor.document.positionAt(start),
+          openEditor.document.positionAt(end),
+        )),
+    )
   }
 
   private isFileMatched(filePath: string) {
@@ -123,34 +178,19 @@ export class Decoration {
   private extract(text: string) {
     const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
-    const extracted = defaultExtractor(this.tailwindContext)(text) as Array<string>
-    const generated = generateRules(extracted, this.tailwindContext) as Array<[
-      {
-        layer: string
+    const generatedRules = generateRules(defaultExtractor(this.tailwindContext)(text), this.tailwindContext) as GenerateRules
+    const generatedCandidates = generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate)
+
+    return generatedCandidates.reduce<ExtractResult>(
+      (acc, value) => {
+        const start = text.indexOf(value, acc.index)
+        const end = start + value.length
+        acc.result.push({ start, end })
+        acc.index = end
+        return acc
       },
-      {
-        raws: {
-          tailwind: {
-            candidate: string
-          }
-        }
-      },
-    ]>
-
-    const validClassNames = new Set<string>()
-    for (const [_, { raws: { tailwind: { candidate } } }] of generated)
-      validClassNames.add(candidate)
-
-    let index = 0
-    const result: Array<{ start: number, value: string }> = []
-    for (const value of extracted) {
-      const start = text.indexOf(value, index)
-
-      if (validClassNames.has(value))
-        result.push({ start, value })
-      index = start + value.length
-    }
-    return result
+      { index: 0, result: [] },
+    ).result
   }
 
   checkContext() {
