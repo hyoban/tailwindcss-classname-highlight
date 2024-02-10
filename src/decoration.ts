@@ -32,11 +32,13 @@ export class Decoration {
   }
 
   private locateTailwindLibPath() {
-    const resolveConfig = require(`${this.workspacePath}/node_modules/tailwindcss/resolveConfig.js`)
-    if (resolveConfig)
+    try {
+      require(`${this.workspacePath}/node_modules/tailwindcss/resolveConfig.js`)
       this.tailwindLibPath = this.workspacePath
-    else
+    }
+    catch {
       this.tailwindLibPath = this.tailwindConfigFolderPath
+    }
   }
 
   private updateTailwindConfigPath() {
