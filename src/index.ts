@@ -14,9 +14,9 @@ export async function activate() {
 
   // on text editor change
   workspace.onDidChangeTextDocument((event) => {
-    const openEditor = window.visibleTextEditors.filter(
+    const openEditor = window.visibleTextEditors.find(
       editor => editor.document.uri === event.document.uri,
-    )[0]
+    )
     decorate(openEditor)
   })
 }

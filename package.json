@@ -28,7 +28,10 @@
     "vscode": "^1.84.0"
   },
   "activationEvents": [
-    "onStartupFinished"
+    "workspaceContains:tailwind.config.ts",
+    "workspaceContains:tailwind.config.js",
+    "workspaceContains:tailwind.config.cjs",
+    "workspaceContains:tailwind.config.mjs"
   ],
   "scripts": {
     "build": "tsup src/index.ts --external vscode",
@@ -41,12 +44,13 @@
     "typecheck": "tsc --noEmit",
     "release": "bumpp && nr publish"
   },
-  "peerDependencies": {
-    "tailwindcss": "^3.4.1"
+  "dependencies": {
+    "micromatch": "^4.0.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^1.2.1",
     "@antfu/ni": "^0.21.12",
+    "@types/micromatch": "^4.0.6",
     "@types/node": "^20.11.16",
     "@types/vscode": "^1.84.0",
     "@vscode/vsce": "^2.23.0",

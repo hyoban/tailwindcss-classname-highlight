@@ -4,22 +4,13 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { Range, type TextEditor, window, workspace } from 'vscode'
 
+import micromatch from 'micromatch'
+
 const defaultConfigFiles = [
   './tailwind.config.js',
   './tailwind.config.cjs',
   './tailwind.config.mjs',
   './tailwind.config.ts',
-]
-
-const validLanguageId = [
-  'html',
-  'javascript',
-  'javascriptreact',
-  'typescript',
-  'typescriptreact',
-  'vue',
-  'php',
-  'svelte',
 ]
 
 const decorationType = window.createTextEditorDecorationType({
@@ -123,8 +114,8 @@ export class Decoration {
   }
 
   decorate(openEditor?: TextEditor | null | undefined) {
-    if (!openEditor
-      || !validLanguageId.includes(openEditor.document.languageId)
+    if (
+      !openEditor || !this.isFileMatched(openEditor.document.uri.fsPath)
     )
       return
 
@@ -138,5 +129,12 @@ export class Decoration {
       ),
     }))
     openEditor.setDecorations(decorationType, decorations)
+  }
+
+  isFileMatched(filePath: string) {
+    const contentPath = this.tailwindContext.tailwindConfig.content.files as string[]
+    const relativePath = path.relative(this.workspacePath, filePath)
+    const isMatch = micromatch.isMatch(relativePath, contentPath)
+    return isMatch
   }
 }
