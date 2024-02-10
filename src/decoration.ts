@@ -11,14 +11,16 @@ const decorationType = window.createTextEditorDecorationType({
   textDecoration: 'none; border-bottom: 1px dashed;',
 })
 
-const logger = window.createOutputChannel('Tailwind CSS ClassName Highlight')
+export const logger = window.createOutputChannel('Tailwind CSS ClassName Highlight')
+
+const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 
 export class Decoration {
   workspacePath: string
-  tailwindConfigPath: null | string = null
-  tailwindConfigFolderPath: null | string = null
+  tailwindConfigPath: string = ''
+  tailwindConfigFolderPath: string = ''
   tailwindContext: any
-  tailwindLibPath: null | string = null
+  tailwindLibPath: string = ''
 
   constructor() {
     this.workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
@@ -26,9 +28,28 @@ export class Decoration {
       throw new Error('No workspace found')
 
     this.updateTailwindConfigPath()
-    this.locateTailwindLibPath()
-    this.updateTailwindContext()
-    this.setupFileWatcher()
+
+    if (this.locateTailwindLibPath()) {
+      this.updateTailwindContext()
+      this.setupFileWatcher()
+    }
+  }
+
+  private updateTailwindConfigPath() {
+    const configPath = fg
+      .globSync(
+        './**/tailwind.config.{js,cjs,mjs,ts}',
+        {
+          cwd: this.workspacePath,
+          ignore: ['**/node_modules/**'],
+        },
+      )
+      .map(p => path.join(this.workspacePath, p))
+      .find(p => fs.existsSync(p))!
+
+    logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
+    this.tailwindConfigPath = configPath
+    this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
   }
 
   private locateTailwindLibPath() {
@@ -37,69 +58,61 @@ export class Decoration {
       this.tailwindLibPath = this.workspacePath
     }
     catch {
-      this.tailwindLibPath = this.tailwindConfigFolderPath
-    }
-  }
-
-  private updateTailwindConfigPath() {
-    let configPath = ''
-    const configFiles = fg.globSync('**/tailwind.config.{js,cjs,mjs,ts}', {
-      cwd: this.workspacePath,
-      ignore: ['**/node_modules/**'],
-    })
-    for (const configFile of configFiles) {
       try {
-        const fullPath = path.join(this.workspacePath, configFile)
-        if (fs.existsSync(fullPath))
-          configPath = fullPath
+        require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/resolveConfig.js`)
+        this.tailwindLibPath = this.tailwindConfigFolderPath
       }
       catch {
-
+        logger.appendLine('Tailwind CSS library path not found, you may need to install Tailwind CSS in your workspace')
+        return false
       }
     }
-    if (!configPath)
-      logger.appendLine('No Tailwind CSS config file found')
-    else
-      logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
-
-    this.tailwindConfigPath = configPath
-    this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
+    return true
   }
 
   private updateTailwindContext() {
-    if (!this.tailwindConfigPath || !this.tailwindConfigFolderPath) {
-      logger.appendLine('No Tailwind CSS config file, can not update context.')
-      return
-    }
+    const now = Date.now()
+    logger.appendLine('Updating Tailwind CSS context')
 
-    const newContext = (
-      configPath: string,
-    ) => {
-      const { createContext } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
-      const { loadConfig } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/load-config.js`)
-      const resolveConfig = require(`${this.tailwindLibPath}/node_modules/tailwindcss/resolveConfig.js`)
-      return createContext(resolveConfig(loadConfig(configPath)))
-    }
+    const { createContext } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
+    const { loadConfig } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/load-config.js`)
+    const resolveConfig = require(`${this.tailwindLibPath}/node_modules/tailwindcss/resolveConfig.js`)
+    this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
 
-    this.tailwindContext = newContext(this.tailwindConfigPath)
+    logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   private setupFileWatcher() {
-    if (!this.tailwindConfigPath)
+    workspace.createFileSystemWatcher(this.tailwindConfigPath)
+      .onDidChange(() => {
+        logger.appendLine('Tailwind CSS config file changed, trying to update context')
+        this.updateTailwindContext()
+      })
+  }
+
+  decorate(openEditor?: TextEditor | null | undefined) {
+    if (!openEditor || !this.isFileMatched(openEditor.document.uri.fsPath))
       return
 
-    const fileWatcher = workspace.createFileSystemWatcher(
-      this.tailwindConfigPath,
-    )
-    fileWatcher.onDidChange(() => {
-      this.updateTailwindContext()
-    })
+    const text = openEditor.document.getText()
+    const extracted = this.extract(text)
+
+    const decorations = extracted.map(({ start, value }) => ({
+      range: new Range(
+        openEditor.document.positionAt(start),
+        openEditor.document.positionAt(start + value.length),
+      ),
+    }))
+    openEditor.setDecorations(decorationType, decorations)
+  }
+
+  private isFileMatched(filePath: string) {
+    const relativeFilePath = path.relative(this.tailwindConfigFolderPath, filePath)
+    const contentFilesPath = this.tailwindContext?.tailwindConfig?.content?.files ?? [] as string[]
+    return micromatch.isMatch(relativeFilePath, contentFilesPath)
   }
 
   private extract(text: string) {
-    if (!this.tailwindConfigPath || !this.tailwindContext || !this.tailwindConfigFolderPath)
-      return []
-
     const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
     const extracted = defaultExtractor(this.tailwindContext)(text) as Array<string>
@@ -132,31 +145,17 @@ export class Decoration {
     return result
   }
 
-  decorate(openEditor?: TextEditor | null | undefined) {
-    if (
-      !openEditor || !this.isFileMatched(openEditor.document.uri.fsPath)
-    )
-      return
+  checkContext() {
+    if (!this.tailwindLibPath) {
+      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
+      return false
+    }
 
-    const text = openEditor.document.getText()
-    const extracted = this.extract(text)
+    if (!this.tailwindContext) {
+      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
+      return false
+    }
 
-    const decorations = extracted.map(({ start, value }) => ({
-      range: new Range(
-        openEditor.document.positionAt(start),
-        openEditor.document.positionAt(start + value.length),
-      ),
-    }))
-    openEditor.setDecorations(decorationType, decorations)
-  }
-
-  isFileMatched(filePath: string) {
-    if (!this.tailwindContext)
-      throw new Error('No Tailwind CSS Context found, can not check file match.')
-
-    const contentPath = this.tailwindContext.tailwindConfig.content.files as string[]
-    const relativePath = path.relative(this.tailwindConfigFolderPath!, filePath)
-    const isMatch = micromatch.isMatch(relativePath, contentPath)
-    return isMatch
+    return true
   }
 }
