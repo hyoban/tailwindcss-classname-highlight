@@ -74,6 +74,7 @@ export class Decoration {
     const now = Date.now()
     logger.appendLine('Updating Tailwind CSS context')
 
+    delete require.cache[require.resolve(this.tailwindConfigPath)]
     const { createContext } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
     const { loadConfig } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/load-config.js`)
     const resolveConfig = require(`${this.tailwindLibPath}/node_modules/tailwindcss/resolveConfig.js`)
