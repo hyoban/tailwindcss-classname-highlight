@@ -20,6 +20,8 @@ export async function activate(extContext: vscode.ExtensionContext) {
   // on text editor change
   extContext.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
+      if (event.document.languageId === 'Log')
+        return
       const openEditor = vscode.window.visibleTextEditors.find(
         editor => editor.document.uri === event.document.uri,
       )

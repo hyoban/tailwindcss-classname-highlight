@@ -38,7 +38,6 @@ export class Decoration {
   tailwindLibPath: string = ''
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
-  latestDecoratedHash: string = ''
 
   extContext: vscode.ExtensionContext
   decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
@@ -135,12 +134,6 @@ export class Decoration {
     const currentTextContentHash = crypto
       ? crypto.createHash('md5').update(text).digest('hex')
       : ''
-
-    if (crypto) {
-      if (currentTextContentHash === this.latestDecoratedHash)
-        return
-      this.latestDecoratedHash = currentTextContentHash
-    }
 
     let numberRange: NumberRange[] = []
 
