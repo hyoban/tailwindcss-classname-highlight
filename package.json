@@ -45,11 +45,11 @@
     "release": "bumpp && nr publish"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^1.2.1",
+    "@antfu/eslint-config": "^2.6.4",
     "@antfu/ni": "^0.21.12",
     "@types/micromatch": "^4.0.6",
-    "@types/node": "^20.11.16",
-    "@types/vscode": "^1.84.0",
+    "@types/node": "^20.11.17",
+    "@types/vscode": "1.84.0",
     "@vscode/vsce": "^2.23.0",
     "bumpp": "^9.3.0",
     "eslint": "^8.56.0",
@@ -58,9 +58,9 @@
     "micromatch": "^4.0.5",
     "pnpm": "^8.15.1",
     "rimraf": "^5.0.5",
-    "tsup": "^7.3.0",
+    "tsup": "^8.0.2",
     "typescript": "^5.3.3",
-    "vite": "^4.5.2",
+    "vite": "^5.1.1",
     "vitest": "^1.2.2"
   }
 }
