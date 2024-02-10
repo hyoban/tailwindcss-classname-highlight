@@ -18,6 +18,7 @@ export class Decoration {
   tailwindConfigPath: null | string = null
   tailwindConfigFolderPath: null | string = null
   tailwindContext: any
+  tailwindLibPath: null | string = null
 
   constructor() {
     this.workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
@@ -25,8 +26,17 @@ export class Decoration {
       throw new Error('No workspace found')
 
     this.updateTailwindConfigPath()
+    this.locateTailwindLibPath()
     this.updateTailwindContext()
     this.setupFileWatcher()
+  }
+
+  private locateTailwindLibPath() {
+    const resolveConfig = require(`${this.workspacePath}/node_modules/tailwindcss/resolveConfig.js`)
+    if (resolveConfig)
+      this.tailwindLibPath = this.workspacePath
+    else
+      this.tailwindLibPath = this.tailwindConfigFolderPath
   }
 
   private updateTailwindConfigPath() {
@@ -63,9 +73,9 @@ export class Decoration {
     const newContext = (
       configPath: string,
     ) => {
-      const { createContext } = require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
-      const { loadConfig } = require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/lib/lib/load-config.js`)
-      const resolveConfig = require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/resolveConfig.js`)
+      const { createContext } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/setupContextUtils.js`)
+      const { loadConfig } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/load-config.js`)
+      const resolveConfig = require(`${this.tailwindLibPath}/node_modules/tailwindcss/resolveConfig.js`)
       return createContext(resolveConfig(loadConfig(configPath)))
     }
 
@@ -88,8 +98,8 @@ export class Decoration {
     if (!this.tailwindConfigPath || !this.tailwindContext || !this.tailwindConfigFolderPath)
       return []
 
-    const { defaultExtractor } = require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
-    const { generateRules } = require(`${this.tailwindConfigFolderPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
+    const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
+    const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
     const extracted = defaultExtractor(this.tailwindContext)(text) as Array<string>
     const generated = generateRules(extracted, this.tailwindContext) as Array<[
       {
