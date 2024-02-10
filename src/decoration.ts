@@ -171,14 +171,16 @@ export class Decoration {
   private extract(text: string) {
     const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
-    const generatedRules = generateRules(defaultExtractor(this.tailwindContext)(text), this.tailwindContext) as GenerateRules
-    const generatedCandidates = generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate)
+    const extracted = defaultExtractor(this.tailwindContext)(text) as string[]
+    const generatedRules = generateRules(extracted, this.tailwindContext) as GenerateRules
+    const generatedCandidates = new Set(generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate))
 
-    return generatedCandidates.reduce<ExtractResult>(
+    return extracted.reduce<ExtractResult>(
       (acc, value) => {
         const start = text.indexOf(value, acc.index)
         const end = start + value.length
-        acc.result.push({ start, end })
+        if (generatedCandidates.has(value))
+          acc.result.push({ start, end })
         acc.index = end
         return acc
       },
