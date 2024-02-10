@@ -3,13 +3,23 @@
 import path from 'node:path'
 import fs from 'node:fs'
 import { Range, type TextEditor, window, workspace } from 'vscode'
-import { getClassNames } from './utils'
 
 const defaultConfigFiles = [
   './tailwind.config.js',
   './tailwind.config.cjs',
   './tailwind.config.mjs',
   './tailwind.config.ts',
+]
+
+const validLanguageId = [
+  'html',
+  'javascript',
+  'javascriptreact',
+  'typescript',
+  'typescriptreact',
+  'vue',
+  'php',
+  'svelte',
 ]
 
 const decorationType = window.createTextEditorDecorationType({
@@ -23,28 +33,15 @@ export class Decoration {
   workspacePath: string
   tailwindConfigPath: string = ''
   tailwindContext: any
-  isValidClassNameCache: Map<string, boolean> = new Map()
-  classRegex: Array<RegExp> = []
 
   constructor() {
     this.workspacePath = workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
     if (!this.workspacePath)
       throw new Error('No workspace found')
 
-    this.updateCustomRegExps()
-    workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('tailwindcss-classname-highlight.classRegex'))
-        this.updateCustomRegExps()
-    })
-
     this.updateTailwindConfigPath()
     this.updateTailwindContext()
     this.setupFileWatcher()
-  }
-
-  private updateCustomRegExps() {
-    const config = workspace.getConfiguration().get('tailwindcss-classname-highlight.classRegex') as Array<string>
-    this.classRegex = config.map(r => new RegExp(r))
   }
 
   private updateTailwindConfigPath() {
@@ -89,31 +86,52 @@ export class Decoration {
     )
     fileWatcher.onDidChange(() => {
       this.updateTailwindContext()
-      this.isValidClassNameCache.clear()
     })
   }
 
-  private isValidClassName(
-    className: string,
-  ) {
-    if (this.isValidClassNameCache.has(className))
-      return this.isValidClassNameCache.get(className)
-
+  private extract(text: string) {
+    const { defaultExtractor } = require(`${this.workspacePath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.workspacePath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
+    const extracted = defaultExtractor(this.tailwindContext)(text) as Array<string>
+    const generated = generateRules(extracted, this.tailwindContext) as Array<[
+      {
+        layer: string
+      },
+      {
+        raws: {
+          tailwind: {
+            candidate: string
+          }
+        }
+      },
+    ]>
 
-    const isValid = generateRules([className], this.tailwindContext).length !== 0
-    this.isValidClassNameCache.set(className, isValid)
-    return isValid
+    const validClassNames = new Set<string>()
+    for (const [_, { raws: { tailwind: { candidate } } }] of generated)
+      validClassNames.add(candidate)
+
+    let index = 0
+    const result: Array<{ start: number, value: string }> = []
+    for (const value of extracted) {
+      const start = text.indexOf(value, index)
+
+      if (validClassNames.has(value))
+        result.push({ start, value })
+      index = start + value.length
+    }
+    return result
   }
 
   decorate(openEditor?: TextEditor | null | undefined) {
-    if (!openEditor)
+    if (!openEditor
+      || !validLanguageId.includes(openEditor.document.languageId)
+    )
       return
 
     const text = openEditor.document.getText()
-    const classNames = getClassNames(text, this.classRegex)
-    const validClassNames = classNames.filter(({ value }) => this.isValidClassName(value))
-    const decorations = validClassNames.map(({ start, value }) => ({
+    const extracted = this.extract(text)
+
+    const decorations = extracted.map(({ start, value }) => ({
       range: new Range(
         openEditor.document.positionAt(start),
         openEditor.document.positionAt(start + value.length),
