@@ -38,6 +38,13 @@ type ExtractResult = {
   result: NumberRange[]
 }
 
+const defaultIdeMatchInclude = [
+  // String literals
+  /(["'`])[^\1]*?\1/g,
+  // HTML tags
+  /<[^>]+?>/g,
+]
+
 export class Decoration {
   workspacePath: string
   tailwindConfigPath = ''
@@ -175,6 +182,17 @@ export class Decoration {
   }
 
   private extract(text: string) {
+    const includedTextWithRange: Array<{ text: string, range: NumberRange }> = []
+
+    for (const regex of defaultIdeMatchInclude) {
+      for (const match of text.matchAll(regex)) {
+        includedTextWithRange.push({
+          text: match[0],
+          range: { start: match.index!, end: match.index! + match[0].length },
+        })
+      }
+    }
+
     const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
     const extracted = defaultExtractor(this.tailwindContext)(text) as string[]
@@ -186,7 +204,10 @@ export class Decoration {
       (acc, value) => {
         const start = text.indexOf(value, acc.index)
         const end = start + value.length
-        if (generatedCandidates.has(value))
+        if (
+          generatedCandidates.has(value)
+          && includedTextWithRange.some(({ range }) => range.start <= start && range.end >= end)
+        )
           acc.result.push({ start, end })
         acc.index = end
         return acc
