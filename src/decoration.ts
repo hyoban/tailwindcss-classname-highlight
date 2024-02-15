@@ -1,10 +1,18 @@
-/* eslint-disable ts/no-require-imports */
-/* eslint-disable ts/no-var-requires */
-import path from 'node:path'
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/consistent-type-imports */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
+/* eslint-disable unicorn/prefer-module */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'node:fs'
-import * as vscode from 'vscode'
-import micromatch from 'micromatch'
+import path from 'node:path'
+
 import fg from 'fast-glob'
+import micromatch from 'micromatch'
+import * as vscode from 'vscode'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
@@ -20,22 +28,22 @@ type GenerateRules = Array<[
   },
 ]>
 
-interface NumberRange {
+type NumberRange = {
   start: number
   end: number
 }
 
-interface ExtractResult {
+type ExtractResult = {
   index: number
   result: NumberRange[]
 }
 
 export class Decoration {
   workspacePath: string
-  tailwindConfigPath: string = ''
-  tailwindConfigFolderPath: string = ''
+  tailwindConfigPath = ''
+  tailwindConfigFolderPath = ''
   tailwindContext: any
-  tailwindLibPath: string = ''
+  tailwindLibPath = ''
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
@@ -45,8 +53,7 @@ export class Decoration {
 
   constructor(extContext: vscode.ExtensionContext) {
     this.extContext = extContext
-    this.extContext.subscriptions.push(this.decorationType)
-    this.extContext.subscriptions.push(this.logger)
+    this.extContext.subscriptions.push(this.decorationType, this.logger)
 
     this.workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
     if (!this.workspacePath)
@@ -128,8 +135,7 @@ export class Decoration {
     try {
       crypto = require('node:crypto')
     }
-    catch (err) {
-    }
+    catch { /* empty */ }
 
     const currentTextContentHash = crypto
       ? crypto.createHash('md5').update(text).digest('hex')
@@ -175,6 +181,7 @@ export class Decoration {
     const generatedRules = generateRules(extracted, this.tailwindContext) as GenerateRules
     const generatedCandidates = new Set(generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate))
 
+    // eslint-disable-next-line unicorn/no-array-reduce
     return extracted.reduce<ExtractResult>(
       (acc, value) => {
         const start = text.indexOf(value, acc.index)

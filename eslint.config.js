@@ -1,15 +1,5 @@
+/* eslint-disable unicorn/prefer-module */
 // @ts-check
-const antfu = require('@antfu/eslint-config').default
+const hyoban = require('eslint-config-hyoban').default
 
-module.exports = antfu(
-  {
-    ignores: [
-      // eslint ignore globs here
-    ],
-  },
-  {
-    rules: {
-      // overrides
-    },
-  },
-)
+module.exports = hyoban({ react: false, next: false })

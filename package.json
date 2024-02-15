@@ -38,20 +38,33 @@
     "dev": "pnpm build --watch",
     "lint": "eslint .",
     "vscode:prepublish": "pnpm build",
-    "publish": "vsce publish --no-dependencies",
+    "publish": "vsce publish --no-dependencies -p $VSCODE_EXTENSION_TOKEN",
     "pack": "vsce package --no-dependencies",
     "test": "vitest",
-    "typecheck": "tsc --noEmit",
-    "release": "bumpp && pnpm run publish"
+    "typecheck": "tsc"
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release v${version}"
+    },
+    "hooks": {
+      "before:init": [
+        "pnpm run lint",
+        "pnpm run typecheck"
+      ],
+      "before:release": "pnpm run publish"
+    },
+    "npm": {
+      "publish": false
+    }
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.6.4",
     "@types/micromatch": "^4.0.6",
     "@types/node": "18.17.0",
     "@types/vscode": "1.84.0",
     "@vscode/vsce": "^2.23.0",
-    "bumpp": "^9.3.0",
     "eslint": "^8.56.0",
+    "eslint-config-hyoban": "^0.1.2",
     "fast-glob": "^3.3.2",
     "micromatch": "^4.0.5",
     "tsup": "^8.0.2",

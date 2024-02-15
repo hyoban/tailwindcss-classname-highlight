@@ -1,7 +1,8 @@
 import * as vscode from 'vscode'
+
 import { Decoration } from './decoration'
 
-export async function activate(extContext: vscode.ExtensionContext) {
+export function activate(extContext: vscode.ExtensionContext) {
   const decoration = new Decoration(extContext)
   if (!decoration.checkContext())
     return
@@ -10,15 +11,13 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   // on activation
   const openEditors = vscode.window.visibleTextEditors
-  openEditors.forEach(decorate)
+  for (const element of openEditors) {
+    decorate(element)
+  }
 
   // on editor change
   extContext.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(decorate),
-  )
-
-  // on text editor change
-  extContext.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
       if (event.document.languageId === 'Log')
         return
@@ -28,8 +27,4 @@ export async function activate(extContext: vscode.ExtensionContext) {
       decorate(openEditor)
     }),
   )
-}
-
-export function deactivate() {
-
 }
