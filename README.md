@@ -6,6 +6,15 @@
 
 Highlight valid Tailwind CSS class names in your code.
 
+## Checklist
+
+- [ ] Ensure [tailwind](https://tailwindcss.com/docs/installation) is installed correctly.
+- [ ] [Tailwind configuration file](https://tailwindcss.com/docs/configuration) exists.
+- [ ] [Content Configuration](https://tailwindcss.com/docs/content-configuration) is set up correctly.
+
+> [!NOTE]
+> Reload the plugin after first tailwind installation.
+
 ## License
 
 [MIT](./LICENSE) License © 2023-PRESENT [Stephen Zhou](https://github.com/hyoban)
