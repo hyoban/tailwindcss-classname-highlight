@@ -2,4 +2,4 @@
 // @ts-check
 const hyoban = require('eslint-config-hyoban').default
 
-module.exports = hyoban({ react: false, next: false })
+module.exports = hyoban({ react: false, next: false, typescript: { typeChecked: false } })
