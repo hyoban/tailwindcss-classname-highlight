@@ -4,17 +4,13 @@
 
 ![ScreenShot 2024-02-08 15 11 36](https://github.com/hyoban/tailwindcss-classname-highlight/assets/38493346/81cf883b-67a5-4db8-84b8-f1ae4121a0fc)
 
-Highlight valid Tailwind CSS class names in your code.
+Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code Extension](https://unocss.dev/integrations/vscode)
 
-## Checklist
+## Not working?
 
-- [ ] Ensure [tailwind](https://tailwindcss.com/docs/installation) is installed correctly.
-- [ ] [Tailwind configuration file](https://tailwindcss.com/docs/configuration) exists.
+- [ ] Ensure [Tailwind](https://tailwindcss.com/docs/installation) is installed.
+- [ ] [Tailwind configuration file](https://tailwindcss.com/docs/configuration) exists in workspace.
 - [ ] [Content Configuration](https://tailwindcss.com/docs/content-configuration) is set up correctly.
 
 > [!NOTE]
 > Reload the plugin after first tailwind installation.
-
-## License
-
-[MIT](./LICENSE) License © 2023-PRESENT [Stephen Zhou](https://github.com/hyoban)
