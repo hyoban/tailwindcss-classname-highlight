@@ -1,5 +1,2 @@
-/* eslint-disable unicorn/prefer-module */
-// @ts-check
-const hyoban = require('eslint-config-hyoban').default
-
-module.exports = hyoban({ react: false, next: false, typescript: { typeChecked: false } })
+// eslint-disable-next-line unicorn/prefer-module, unicorn/no-await-expression-member
+module.exports = (async () => (await import('./eslint.config.mjs')).default)()
