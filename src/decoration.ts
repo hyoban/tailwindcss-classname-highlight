@@ -68,7 +68,6 @@ export class Decoration {
 
     if (this.locateTailwindLibPath()) {
       this.updateTailwindContext()
-      this.setupFileWatcher()
     }
   }
 
@@ -118,16 +117,6 @@ export class Decoration {
     this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
 
     this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
-  }
-
-  private setupFileWatcher() {
-    this.extContext.subscriptions.push(
-      vscode.workspace.createFileSystemWatcher(this.tailwindConfigPath)
-        .onDidChange(() => {
-          this.logger.appendLine('Tailwind CSS config file changed, trying to update context')
-          this.updateTailwindContext()
-        }),
-    )
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {

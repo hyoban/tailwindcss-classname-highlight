@@ -13,4 +13,4 @@ Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code
 - [ ] [Content Configuration](https://tailwindcss.com/docs/content-configuration) is set up correctly.
 
 > [!NOTE]
-> Reload the plugin after first tailwind installation.
+> Reload the plugin after installing dependencies or changing configuration.
