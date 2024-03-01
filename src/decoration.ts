@@ -31,14 +31,11 @@ type NumberRange = {
   end: number
 }
 
-type ExtractResult = {
-  index: number
-  result: NumberRange[]
-}
-
 const defaultIdeMatchInclude = [
   // String literals
   /(["'`])[^\1]*?\1/g,
+  // CSS directives
+  /(@apply)[^;]*?;/g,
 ]
 
 export class Decoration {
@@ -161,6 +158,8 @@ export class Decoration {
   }
 
   private isFileMatched(filePath: string) {
+    if (path.extname(filePath) === '.css')
+      return true
     const relativeFilePath = path.relative(this.tailwindConfigFolderPath, filePath)
     const contentFilesPath = this.tailwindContext?.tailwindConfig?.content?.files ?? [] as string[]
     return micromatch.isMatch(relativeFilePath, contentFilesPath)
@@ -180,25 +179,29 @@ export class Decoration {
 
     const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
-    const extracted = defaultExtractor(this.tailwindContext)(text) as string[]
+    const extracted = defaultExtractor(this.tailwindContext)(
+      /(@apply)[^;]*?;/g.test(text)
+      // rewrite @apply border-border; -> @apply border-border ;
+      // add space before the final semicolon
+        ? text.replaceAll(/(@apply[^;]*?)(;)/g, '$1 ;')
+        : text,
+    ) as string[]
     const generatedRules = generateRules(extracted, this.tailwindContext) as GenerateRules
     const generatedCandidates = new Set(generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate))
 
-    // eslint-disable-next-line unicorn/no-array-reduce
-    return extracted.reduce<ExtractResult>(
-      (acc, value) => {
-        const start = text.indexOf(value, acc.index)
-        const end = start + value.length
-        if (
-          generatedCandidates.has(value)
-          && includedTextWithRange.some(({ range }) => range.start <= start && range.end >= end)
-        )
-          acc.result.push({ start, end })
-        acc.index = end
-        return acc
-      },
-      { index: 0, result: [] },
-    ).result
+    const result: NumberRange[] = []
+    let index = 0
+    for (const value of extracted) {
+      const start = text.indexOf(value, index)
+      const end = start + value.length
+      if (
+        generatedCandidates.has(value)
+        && includedTextWithRange.some(({ range }) => range.start <= start && range.end >= end)
+      )
+        result.push({ start, end })
+      index = end
+    }
+    return result
   }
 
   checkContext() {
