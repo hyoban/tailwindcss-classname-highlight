@@ -39,8 +39,6 @@ type ExtractResult = {
 const defaultIdeMatchInclude = [
   // String literals
   /(["'`])[^\1]*?\1/g,
-  // HTML tags
-  /<[^>]+?>/g,
 ]
 
 export class Decoration {
