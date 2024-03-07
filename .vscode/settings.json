@@ -13,11 +13,16 @@
     "json",
     "jsonc",
     "yaml",
+    "github-actions-workflow",
     "css"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+  "eslint.codeActionsOnSave.rules": [
+    "!unused-imports/no-unused-imports",
+    "*"
+  ],
   "eslint.rules.customizations": [
     { "rule": "@stylistic/*", "severity": "off" },
     { "rule": "simple-import-sort/*", "severity": "off" },
