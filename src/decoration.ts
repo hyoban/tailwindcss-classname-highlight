@@ -180,7 +180,7 @@ export class Decoration {
     }
 
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
-    const extracted = defaultExtractor(this.tailwindContext)(
+    const extracted = defaultExtractor(this.tailwindContext.tailwindConfig.separator)(
       /(@apply)[^;]*?;/g.test(text)
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon

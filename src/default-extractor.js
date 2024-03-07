@@ -2,8 +2,8 @@
 
 import * as regex from './regex'
 
-export function defaultExtractor(context) {
-  let patterns = [...buildRegExps(context)]
+export function defaultExtractor(separator) {
+  let patterns = [...buildRegExps(separator)]
 
   /**
    * @param {string} content
@@ -22,11 +22,10 @@ export function defaultExtractor(context) {
   }
 }
 
-function* buildRegExps(context) {
-  let separator = context.tailwindConfig.separator
+function* buildRegExps(separator) {
   let prefix
-    = context.tailwindConfig.prefix !== ''
-      ? regex.optional(regex.pattern([/-?/, regex.escape(context.tailwindConfig.prefix)]))
+    = separator !== ''
+      ? regex.optional(regex.pattern([/-?/, regex.escape(separator)]))
       : ''
 
   let utility = regex.any([
