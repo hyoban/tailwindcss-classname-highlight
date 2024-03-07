@@ -49,21 +49,6 @@
     "typecheck": "tsc",
     "vscode:prepublish": "pnpm build"
   },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release v${version}"
-    },
-    "hooks": {
-      "before:init": [
-        "pnpm run lint",
-        "pnpm run typecheck"
-      ],
-      "before:release": "pnpm run publish"
-    },
-    "npm": {
-      "publish": false
-    }
-  },
   "devDependencies": {
     "@types/micromatch": "^4.0.6",
     "@types/node": "20.11.19",
@@ -75,6 +60,8 @@
     "lint-staged": "^15.2.2",
     "local-pkg": "^0.5.0",
     "micromatch": "^4.0.5",
+    "release-it": "^17.1.1",
+    "release-it-pnpm": "4.0.0-beta.1",
     "simple-git-hooks": "^2.9.0",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3",

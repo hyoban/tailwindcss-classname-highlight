@@ -6,26 +6,6 @@ permissions:
 
 on:
   workflow_dispatch:
-    inputs:
-      increment:
-        description: "The release type"
-        required: true
-        default: "patch"
-        type: choice
-        options:
-          - "major"
-          - "minor"
-          - "patch"
-      preRelease:
-        description: "The pre-release type"
-        required: true
-        default: "not"
-        type: choice
-        options:
-          - "alpha"
-          - "beta"
-          - "rc"
-          - "not"
 
 jobs:
   release:
@@ -37,33 +17,23 @@ jobs:
 
       - name: Git config
         run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
 
       - name: Set node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
-
-      - name: Setup
-        run: npm i -g @antfu/ni release-it changelogithub should-semantic-release
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install
-        run: nci
-
-      - name: Pre Release
-        run: if should-semantic-release --verbose ; then release-it ${{ github.event.inputs.increment }} --verbose --preRelease ${{ github.event.inputs.preRelease }} && changelogithub ; fi
-        if: "${{ github.event.inputs.preRelease != 'not' }}"
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          VSCODE_EXTENSION_TOKEN: ${{secrets.VSCODE_EXTENSION_TOKEN}}
+        run: pnpm install --frozen-lockfile
 
       - name: Release
-        run: if should-semantic-release --verbose ; then release-it ${{ github.event.inputs.increment }} --verbose && changelogithub ; fi
-        if: "${{ github.event.inputs.preRelease == 'not' }}"
+        run: if npx should-semantic-release ; then npx release-it --verbose ; fi
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           VSCODE_EXTENSION_TOKEN: ${{secrets.VSCODE_EXTENSION_TOKEN}}
