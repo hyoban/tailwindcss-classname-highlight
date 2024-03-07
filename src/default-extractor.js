@@ -13,9 +13,8 @@ export function defaultExtractor(separator) {
     let results = []
 
     for (let pattern of patterns) {
-      for (let result of content.match(pattern) ?? []) {
+      for (let result of content.match(pattern) ?? [])
         results.push(clipAtBalancedParens(result))
-      }
     }
 
     return results
@@ -154,9 +153,8 @@ let ALLOWED_CLASS_CHARACTERS = /[^\s"'<>\]`]+/
  */
 function clipAtBalancedParens(input) {
   // We are care about this for arbitrary values
-  if (!input.includes('-[')) {
+  if (!input.includes('-['))
     return input
-  }
 
   let depth = 0
   let openStringTypes = []
@@ -184,12 +182,11 @@ function clipAtBalancedParens(input) {
     let char = match[0]
     let inStringType = openStringTypes.at(-1)
 
-    if (char === inStringType) {
+    if (char === inStringType)
       openStringTypes.pop()
-    }
-    else if (char === '\'' || char === '"' || char === '`') {
+
+    else if (char === '\'' || char === '"' || char === '`')
       openStringTypes.push(char)
-    }
 
     if (inStringType) {
       continue
@@ -206,18 +203,16 @@ function clipAtBalancedParens(input) {
     // We've gone one character past the point where we should stop
     // This means that there was an extra closing `]`
     // We'll clip to just before it
-    if (depth < 0) {
+    if (depth < 0)
       return input.slice(0, Math.max(0, match.index - 1))
-    }
 
     // We've finished balancing the brackets but there still may be characters that can be included
     // For example in the class `text-[#336699]/[.35]`
     // The depth goes to `0` at the closing `]` but goes up again at the `[`
 
     // If we're at zero and encounter a non-class character then we clip the class there
-    if (depth === 0 && !ALLOWED_CLASS_CHARACTERS.test(char)) {
+    if (depth === 0 && !ALLOWED_CLASS_CHARACTERS.test(char))
       return input.slice(0, Math.max(0, match.index))
-    }
   }
 
   return input

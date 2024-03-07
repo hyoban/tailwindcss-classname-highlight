@@ -41,9 +41,8 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   // on activation
   const openEditors = vscode.window.visibleTextEditors
-  for (const element of openEditors) {
+  for (const element of openEditors)
     decorate(element)
-  }
 
   // on editor change
   extContext.subscriptions.push(
