@@ -12,6 +12,8 @@ import fg from 'fast-glob'
 import micromatch from 'micromatch'
 import * as vscode from 'vscode'
 
+import { defaultExtractor } from './default-extractor'
+
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
 
@@ -177,7 +179,6 @@ export class Decoration {
       }
     }
 
-    const { defaultExtractor } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/defaultExtractor.js`)
     const { generateRules } = require(`${this.tailwindLibPath}/node_modules/tailwindcss/lib/lib/generateRules.js`)
     const extracted = defaultExtractor(this.tailwindContext)(
       /(@apply)[^;]*?;/g.test(text)
