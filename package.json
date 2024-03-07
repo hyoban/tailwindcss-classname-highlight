@@ -45,6 +45,7 @@
     "pack": "vsce package --no-dependencies",
     "prepare": "simple-git-hooks",
     "publish": "vsce publish --no-dependencies -p $VSCODE_EXTENSION_TOKEN",
+    "release": "release-it",
     "test": "vitest",
     "typecheck": "tsc",
     "vscode:prepublish": "pnpm build"
