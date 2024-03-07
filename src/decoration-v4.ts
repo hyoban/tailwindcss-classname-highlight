@@ -13,7 +13,6 @@ import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
 
-const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
 
 type NumberRange = {
@@ -47,7 +46,7 @@ export class DecorationV4 {
     this.extContext.subscriptions.push(this.decorationType, this.logger)
 
     if (this.locateTailwindLibPath()) {
-      this.logger.appendLine('Tailwind CSS lib path located')
+      this.logger.appendLine(`Tailwind CSS lib path located: ${this.tailwindLibPath}`)
     }
   }
 
@@ -67,16 +66,16 @@ export class DecorationV4 {
     this.logger.appendLine('Updating Tailwind CSS context')
 
     const { __unstable__loadDesignSystem } = await importModule(this.tailwindLibPath)
-    const presetTheme = resolveModule('tailwindcss/theme.css', { paths: [this.workspacePath] })
-    if (!presetTheme) {
-      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Preset theme not found`)
+    const presetThemePath = resolveModule('tailwindcss/theme.css', { paths: [this.workspacePath] })
+    if (!presetThemePath) {
+      this.logger.appendLine('Preset theme not found')
       return
     }
-
     const cssPath = path.join(this.workspacePath, this.cssPath)
-    const css = fs.readFileSync(presetTheme, 'utf8') + fs.readFileSync(cssPath, 'utf8')
+
+    this.logger.appendLine(`Loading css from ${presetThemePath} and ${cssPath}`)
+    const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
-    // this.logger.appendLine(JSON.stringify(this.tailwindContext, null, 2))
 
     this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
@@ -84,8 +83,6 @@ export class DecorationV4 {
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
     if (!openEditor)
       return
-
-    this.logger.appendLine(`Decorating${openEditor.document.uri.toString()}`)
 
     const text = openEditor.document.getText()
 
@@ -166,7 +163,7 @@ export class DecorationV4 {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind lib path not found`)
+      this.logger.appendLine('Tailwind lib path not found, this extension will not work')
       return false
     }
     return true
