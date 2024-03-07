@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -6,7 +7,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import {
-  importModule,
   resolveModule,
 } from 'local-pkg'
 import * as vscode from 'vscode'
@@ -47,6 +47,7 @@ export class DecorationV4 {
 
     if (this.locateTailwindLibPath()) {
       this.logger.appendLine(`Tailwind CSS lib path located: ${this.tailwindLibPath}`)
+      this.updateTailwindContext()
     }
   }
 
@@ -57,15 +58,15 @@ export class DecorationV4 {
       return false
     }
 
-    this.tailwindLibPath = tailwind
+    this.tailwindLibPath = tailwind.replaceAll('.mjs', '.js')
     return true
   }
 
-  async updateTailwindContext() {
+  updateTailwindContext() {
     const now = Date.now()
     this.logger.appendLine('Updating Tailwind CSS context')
 
-    const { __unstable__loadDesignSystem } = await importModule(this.tailwindLibPath)
+    const { __unstable__loadDesignSystem } = require(this.tailwindLibPath)
     const presetThemePath = resolveModule('tailwindcss/theme.css', { paths: [this.workspacePath] })
     if (!presetThemePath) {
       this.logger.appendLine('Preset theme not found')

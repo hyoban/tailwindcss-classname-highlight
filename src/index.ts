@@ -37,8 +37,6 @@ export async function activate(extContext: vscode.ExtensionContext) {
   if (!decoration.checkContext())
     return
 
-  await decoration.updateTailwindContext()
-
   const decorate = decoration.decorate.bind(decoration)
 
   // on activation

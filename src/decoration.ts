@@ -62,7 +62,10 @@ export class Decoration {
 
     this.updateTailwindConfigPath()
 
-    this.locateTailwindLibPath()
+    if (this.locateTailwindLibPath()) {
+      this.logger.appendLine(`Tailwind CSS lib path located: ${this.tailwindLibPath}`)
+      this.updateTailwindContext()
+    }
   }
 
   private updateTailwindConfigPath() {
