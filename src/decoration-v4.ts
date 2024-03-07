@@ -146,10 +146,8 @@ export class DecorationV4 {
         : text,
     ) as string[]
 
-    this.logger.appendLine(`Extracted: ${JSON.stringify(extracted)}`)
     const generatedRules = this.tailwindContext.candidatesToCss(extracted) as Array<string | null>
     const generatedCandidates = new Set(extracted.filter((_, i) => generatedRules[i]))
-    this.logger.appendLine(`Generated: ${JSON.stringify(generatedRules)}`)
 
     const result: NumberRange[] = []
     let index = 0
