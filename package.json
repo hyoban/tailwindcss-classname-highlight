@@ -25,11 +25,19 @@
     "vscode": "^1.84.0"
   },
   "activationEvents": [
-    "workspaceContains:**/tailwind.config.ts",
-    "workspaceContains:**/tailwind.config.js",
-    "workspaceContains:**/tailwind.config.cjs",
-    "workspaceContains:**/tailwind.config.mjs"
+    "onStartupFinished"
   ],
+  "contributes": {
+    "configuration": {
+      "title": "Tailwind CSS ClassName Highlight",
+      "properties": {
+        "tailwindcss-classname-highlight.cssPath": {
+          "description": "The path to the tailwindcss style file. (v4 only)",
+          "type": "string"
+        }
+      }
+    }
+  },
   "scripts": {
     "build": "tsup src/index.ts --external vscode",
     "dev": "pnpm build --watch",
@@ -65,6 +73,7 @@
     "eslint-config-hyoban": "^0.1.22",
     "fast-glob": "^3.3.2",
     "lint-staged": "^15.2.2",
+    "local-pkg": "^0.5.0",
     "micromatch": "^4.0.5",
     "simple-git-hooks": "^2.9.0",
     "tsup": "^8.0.2",

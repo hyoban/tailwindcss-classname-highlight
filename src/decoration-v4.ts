@@ -1,33 +1,20 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
 /* eslint-disable unicorn/prefer-module */
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import fs from 'node:fs'
 import path from 'node:path'
 
-import fg from 'fast-glob'
-import { resolveModule } from 'local-pkg'
-import micromatch from 'micromatch'
+import {
+  importModule,
+  resolveModule,
+} from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
-
-type GenerateRules = Array<[
-  Record<string, unknown>,
-  {
-    raws: {
-      tailwind: {
-        candidate: string
-      }
-    }
-  },
-]>
 
 type NumberRange = {
   start: number
@@ -41,72 +28,64 @@ const defaultIdeMatchInclude = [
   /(@apply)[^;]*?;/g,
 ]
 
-export class Decoration {
-  tailwindConfigPath = ''
-  tailwindConfigFolderPath = ''
+export class DecorationV4 {
   tailwindContext: any
   tailwindLibPath = ''
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
-  extContext: vscode.ExtensionContext
   decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
   logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
   constructor(
-    extContext: vscode.ExtensionContext,
+    private extContext: vscode.ExtensionContext,
     private workspacePath: string,
+    private cssPath: string,
   ) {
+    this.logger.appendLine('Initializing Tailwind CSS ClassName Highlight')
     this.extContext = extContext
     this.extContext.subscriptions.push(this.decorationType, this.logger)
 
-    this.updateTailwindConfigPath()
-
-    this.locateTailwindLibPath()
-  }
-
-  private updateTailwindConfigPath() {
-    const configPath = fg
-      .globSync(
-        './**/tailwind.config.{js,cjs,mjs,ts}',
-        {
-          cwd: this.workspacePath,
-          ignore: ['**/node_modules/**'],
-        },
-      )
-      .map(p => path.join(this.workspacePath, p))
-      .find(p => fs.existsSync(p))!
-
-    this.logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
-    this.tailwindConfigPath = configPath
-    this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
+    if (this.locateTailwindLibPath()) {
+      this.logger.appendLine('Tailwind CSS lib path located')
+    }
   }
 
   private locateTailwindLibPath() {
     const tailwind = resolveModule('tailwindcss', { paths: [this.workspacePath] })
-    if (!tailwind)
+    if (!tailwind) {
+      this.logger.appendLine('Tailwind CSS lib path not found')
       return false
-    this.tailwindLibPath = path.resolve(tailwind, '../../')
-    this.logger.appendLine(`Tailwind CSS lib path: ${this.tailwindLibPath}`)
+    }
+
+    this.tailwindLibPath = tailwind
     return true
   }
 
-  updateTailwindContext() {
+  async updateTailwindContext() {
     const now = Date.now()
     this.logger.appendLine('Updating Tailwind CSS context')
 
-    delete require.cache[require.resolve(this.tailwindConfigPath)]
-    const { createContext } = require(`${this.tailwindLibPath}/lib/lib/setupContextUtils.js`)
-    const { loadConfig } = require(`${this.tailwindLibPath}/lib/lib/load-config.js`)
-    const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`)
-    this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
+    const { __unstable__loadDesignSystem } = await importModule(this.tailwindLibPath)
+    const presetTheme = resolveModule('tailwindcss/theme.css', { paths: [this.workspacePath] })
+    if (!presetTheme) {
+      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Preset theme not found`)
+      return
+    }
+
+    const cssPath = path.join(this.workspacePath, this.cssPath)
+    const css = fs.readFileSync(presetTheme, 'utf8') + fs.readFileSync(cssPath, 'utf8')
+    this.tailwindContext = __unstable__loadDesignSystem(css)
+    // this.logger.appendLine(JSON.stringify(this.tailwindContext, null, 2))
 
     this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
-    if (!openEditor || !this.isFileMatched(openEditor.document.uri.fsPath))
+    if (!openEditor)
       return
+
+    this.logger.appendLine(`Decorating${openEditor.document.uri.toString()}`)
 
     const text = openEditor.document.getText()
 
@@ -147,14 +126,6 @@ export class Decoration {
     )
   }
 
-  private isFileMatched(filePath: string) {
-    if (path.extname(filePath) === '.css')
-      return true
-    const relativeFilePath = path.relative(this.tailwindConfigFolderPath, filePath)
-    const contentFilesPath = this.tailwindContext?.tailwindConfig?.content?.files ?? [] as string[]
-    return micromatch.isMatch(relativeFilePath, contentFilesPath)
-  }
-
   private extract(text: string) {
     const includedTextWithRange: Array<{ text: string, range: NumberRange }> = []
 
@@ -167,16 +138,18 @@ export class Decoration {
       }
     }
 
-    const { generateRules } = require(`${this.tailwindLibPath}/lib/lib/generateRules.js`)
-    const extracted = defaultExtractor(this.tailwindContext.tailwindConfig.separator)(
+    const extracted = defaultExtractor(':')(
       /(@apply)[^;]*?;/g.test(text)
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
         ? text.replaceAll(/(@apply[^;]*?)(;)/g, '$1 ;')
         : text,
     ) as string[]
-    const generatedRules = generateRules(extracted, this.tailwindContext) as GenerateRules
-    const generatedCandidates = new Set(generatedRules.map(([, { raws: { tailwind: { candidate } } }]) => candidate))
+
+    this.logger.appendLine(`Extracted: ${JSON.stringify(extracted)}`)
+    const generatedRules = this.tailwindContext.candidatesToCss(extracted) as Array<string | null>
+    const generatedCandidates = new Set(extracted.filter((_, i) => generatedRules[i]))
+    this.logger.appendLine(`Generated: ${JSON.stringify(generatedRules)}`)
 
     const result: NumberRange[] = []
     let index = 0
@@ -195,10 +168,9 @@ export class Decoration {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
+      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind lib path not found`)
       return false
     }
-
     return true
   }
 }
