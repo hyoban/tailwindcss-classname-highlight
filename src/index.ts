@@ -5,7 +5,7 @@ import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
-import { Decoration } from './decoration'
+import { Decoration } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 
 export async function activate(extContext: vscode.ExtensionContext) {

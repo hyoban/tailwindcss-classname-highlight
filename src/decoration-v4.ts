@@ -39,7 +39,13 @@ export class DecorationV4 {
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
-    this.updateTailwindContext()
+    try {
+      this.updateTailwindContext()
+    }
+    catch (error) {
+      if (error instanceof Error)
+        this.logger.appendLine(`Error updating Tailwind CSS context${error.message}`)
+    }
   }
 
   updateTailwindContext() {

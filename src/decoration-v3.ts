@@ -52,7 +52,13 @@ export class Decoration {
     private tailwindConfigPath: string,
   ) {
     this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
-    this.updateTailwindContext()
+    try {
+      this.updateTailwindContext()
+    }
+    catch (error) {
+      if (error instanceof Error)
+        this.logger.appendLine(`Error updating Tailwind CSS context: ${error.message}`)
+    }
   }
 
   updateTailwindContext() {
