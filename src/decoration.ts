@@ -5,11 +5,8 @@
 /* eslint-disable @typescript-eslint/no-dynamic-delete */
 /* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import fs from 'node:fs'
 import path from 'node:path'
 
-import fg from 'fast-glob'
-import { resolveModule } from 'local-pkg'
 import micromatch from 'micromatch'
 import * as vscode from 'vscode'
 
@@ -42,56 +39,26 @@ const defaultIdeMatchInclude = [
 ]
 
 export class Decoration {
-  tailwindConfigPath = ''
   tailwindConfigFolderPath = ''
   tailwindContext: any
-  tailwindLibPath = ''
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
   extContext: vscode.ExtensionContext
   decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
-  logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
   constructor(
     extContext: vscode.ExtensionContext,
     private workspacePath: string,
+    private logger: vscode.OutputChannel,
+    private tailwindLibPath: string,
+    private tailwindConfigPath: string,
   ) {
     this.extContext = extContext
     this.extContext.subscriptions.push(this.decorationType, this.logger)
 
-    this.updateTailwindConfigPath()
-
-    if (this.locateTailwindLibPath()) {
-      this.logger.appendLine(`Tailwind CSS lib path located: ${this.tailwindLibPath}`)
-      this.updateTailwindContext()
-    }
-  }
-
-  private updateTailwindConfigPath() {
-    const configPath = fg
-      .globSync(
-        './**/tailwind.config.{js,cjs,mjs,ts}',
-        {
-          cwd: this.workspacePath,
-          ignore: ['**/node_modules/**'],
-        },
-      )
-      .map(p => path.join(this.workspacePath, p))
-      .find(p => fs.existsSync(p))!
-
-    this.logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
-    this.tailwindConfigPath = configPath
     this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
-  }
-
-  private locateTailwindLibPath() {
-    const tailwind = resolveModule('tailwindcss', { paths: [this.workspacePath] })
-    if (!tailwind)
-      return false
-    this.tailwindLibPath = path.resolve(tailwind, '../../')
-    this.logger.appendLine(`Tailwind CSS lib path: ${this.tailwindLibPath}`)
-    return true
+    this.updateTailwindContext()
   }
 
   updateTailwindContext() {
@@ -199,6 +166,11 @@ export class Decoration {
   checkContext() {
     if (!this.tailwindLibPath) {
       this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
+      return false
+    }
+
+    if (!this.tailwindContext) {
+      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
       return false
     }
 

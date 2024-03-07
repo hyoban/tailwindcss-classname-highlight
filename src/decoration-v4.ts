@@ -29,37 +29,23 @@ const defaultIdeMatchInclude = [
 
 export class DecorationV4 {
   tailwindContext: any
-  tailwindLibPath = ''
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
   decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
-  logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
   constructor(
     private extContext: vscode.ExtensionContext,
     private workspacePath: string,
+    private logger: vscode.OutputChannel,
+    private tailwindLibPath: string,
     private cssPath: string,
   ) {
     this.logger.appendLine('Initializing Tailwind CSS ClassName Highlight')
     this.extContext = extContext
     this.extContext.subscriptions.push(this.decorationType, this.logger)
 
-    if (this.locateTailwindLibPath()) {
-      this.logger.appendLine(`Tailwind CSS lib path located: ${this.tailwindLibPath}`)
-      this.updateTailwindContext()
-    }
-  }
-
-  private locateTailwindLibPath() {
-    const tailwind = resolveModule('tailwindcss', { paths: [this.workspacePath] })
-    if (!tailwind) {
-      this.logger.appendLine('Tailwind CSS lib path not found')
-      return false
-    }
-
-    this.tailwindLibPath = tailwind.replaceAll('.mjs', '.js')
-    return true
+    this.updateTailwindContext()
   }
 
   updateTailwindContext() {
@@ -167,6 +153,12 @@ export class DecorationV4 {
       this.logger.appendLine('Tailwind lib path not found, this extension will not work')
       return false
     }
+
+    if (!this.tailwindContext) {
+      this.logger.appendLine('Tailwind context not found, this extension will not work')
+      return false
+    }
+
     return true
   }
 }

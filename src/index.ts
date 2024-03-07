@@ -1,38 +1,77 @@
+import fs from 'node:fs'
 import path from 'node:path'
 
 import fg from 'fast-glob'
+import { getPackageInfo, resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { Decoration } from './decoration'
 import { DecorationV4 } from './decoration-v4'
+
+const logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
 
 export async function activate(extContext: vscode.ExtensionContext) {
   const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
   if (!workspacePath)
     return
 
-  const configPath = fg
-    .globSync(
-      './**/tailwind.config.{js,cjs,mjs,ts}',
-      {
-        cwd: workspacePath,
-        ignore: ['**/node_modules/**'],
-      },
-    )
-    .map(p => path.join(workspacePath, p))
+  const tailwindcssPackageInfo = await getPackageInfo('tailwindcss', { paths: [workspacePath] })
+  if (!tailwindcssPackageInfo?.version || !tailwindcssPackageInfo?.rootPath) {
+    logger.appendLine('Tailwind CSS package not found')
+    return
+  }
+  logger.appendLine(`Detected Tailwind CSS version: ${tailwindcssPackageInfo.version}`)
 
+  const isV4 = tailwindcssPackageInfo.version.startsWith('4')
   const configration = vscode.workspace.getConfiguration()
   const cssPath = configration.get<string>('tailwindcss-classname-highlight.cssPath') ?? ''
-
-  const isV4 = cssPath !== ''
-  const isV3 = !isV4 && configPath.length > 0
-
-  if (!isV3 && !isV4)
+  if (isV4 && !cssPath) {
+    logger.appendLine('You must set tailwindcss-classname-highlight.cssPath in your settings to use Tailwind CSS v4')
     return
+  }
 
-  const decoration = isV3
-    ? new Decoration(extContext, workspacePath)
-    : new DecorationV4(extContext, workspacePath, cssPath)
+  const tailwindcssPackageEntry = resolveModule('tailwindcss', { paths: [workspacePath] })
+  if (!tailwindcssPackageEntry) {
+    logger.appendLine('Tailwind CSS package entry not found')
+    return
+  }
+
+  let tailwindConfigPath = ''
+
+  if (!isV4) {
+    const configPath = fg
+      .globSync(
+        './**/tailwind.config.{js,cjs,mjs,ts}',
+        {
+          cwd: workspacePath,
+          ignore: ['**/node_modules/**'],
+        },
+      )
+      .map(p => path.join(workspacePath, p))
+      .find(p => fs.existsSync(p))
+    if (!configPath) {
+      logger.appendLine('Tailwind CSS config file not found')
+      return
+    }
+    logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
+    tailwindConfigPath = configPath
+  }
+
+  const decoration = isV4
+    ? new DecorationV4(
+      extContext,
+      workspacePath,
+      logger,
+      tailwindcssPackageEntry.replaceAll('.mjs', '.js'),
+      cssPath,
+    )
+    : new Decoration(
+      extContext,
+      workspacePath,
+      logger,
+      path.resolve(tailwindcssPackageEntry, '../../'),
+      tailwindConfigPath,
+    )
 
   if (!decoration.checkContext())
     return
