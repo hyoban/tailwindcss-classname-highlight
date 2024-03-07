@@ -8,12 +8,13 @@ import * as vscode from 'vscode'
 import { Decoration } from './decoration'
 import { DecorationV4 } from './decoration-v4'
 
-const logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
-
 export async function activate(extContext: vscode.ExtensionContext) {
   const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
   if (!workspacePath)
     return
+  const logger = vscode.window.createOutputChannel('Tailwind CSS ClassName Highlight')
+  const decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
+  extContext.subscriptions.push(logger, decorationType)
 
   const tailwindcssPackageInfo = await getPackageInfo('tailwindcss', { paths: [workspacePath] })
   if (!tailwindcssPackageInfo?.version || !tailwindcssPackageInfo?.rootPath) {
@@ -59,16 +60,16 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   const decoration = isV4
     ? new DecorationV4(
-      extContext,
       workspacePath,
       logger,
+      decorationType,
       tailwindcssPackageEntry.replaceAll('.mjs', '.js'),
       cssPath,
     )
     : new Decoration(
-      extContext,
       workspacePath,
       logger,
+      decorationType,
       path.resolve(tailwindcssPackageEntry, '../../'),
       tailwindConfigPath,
     )

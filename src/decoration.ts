@@ -44,19 +44,13 @@ export class Decoration {
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
-  extContext: vscode.ExtensionContext
-  decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
-
   constructor(
-    extContext: vscode.ExtensionContext,
     private workspacePath: string,
     private logger: vscode.OutputChannel,
+    private decorationType: vscode.TextEditorDecorationType,
     private tailwindLibPath: string,
     private tailwindConfigPath: string,
   ) {
-    this.extContext = extContext
-    this.extContext.subscriptions.push(this.decorationType, this.logger)
-
     this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath)
     this.updateTailwindContext()
   }

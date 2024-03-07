@@ -32,19 +32,13 @@ export class DecorationV4 {
 
   textContentHashCache: Array<[string, NumberRange[]]> = []
 
-  decorationType = vscode.window.createTextEditorDecorationType({ textDecoration: 'none; border-bottom: 1px dashed;' })
-
   constructor(
-    private extContext: vscode.ExtensionContext,
     private workspacePath: string,
     private logger: vscode.OutputChannel,
+    private decorationType: vscode.TextEditorDecorationType,
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
-    this.logger.appendLine('Initializing Tailwind CSS ClassName Highlight')
-    this.extContext = extContext
-    this.extContext.subscriptions.push(this.decorationType, this.logger)
-
     this.updateTailwindContext()
   }
 
