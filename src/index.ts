@@ -30,6 +30,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
     logger.appendLine('You must set tailwindcss-classname-highlight.cssPath in your settings to use Tailwind CSS v4')
     return
   }
+  const cssFilePath = path.join(workspacePath, cssPath)
 
   const tailwindcssPackageEntry = resolveModule('tailwindcss', { paths: [workspacePath] })
   if (!tailwindcssPackageEntry) {
@@ -64,7 +65,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
       logger,
       decorationType,
       tailwindcssPackageEntry.replaceAll('.mjs', '.js'),
-      cssPath,
+      cssFilePath,
     )
     : new DecorationV3(
       workspacePath,
@@ -77,15 +78,23 @@ export async function activate(extContext: vscode.ExtensionContext) {
   if (!decoration.checkContext())
     return
 
+  const onReload = () => {
+    decoration.updateTailwindContext()
+    for (const element of vscode.window.visibleTextEditors)
+      decoration.decorate(element)
+  }
+
+  const fileWatcher = vscode.workspace.createFileSystemWatcher(
+    isV4 ? cssFilePath : tailwindConfigPath,
+  )
+  fileWatcher.onDidChange(onReload)
+
   extContext.subscriptions.push(
     vscode.commands.registerCommand(
       'tailwindcss-classname-highlight.reload',
-      () => {
-        decoration.updateTailwindContext()
-        for (const element of vscode.window.visibleTextEditors)
-          decoration.decorate(element)
-      },
+      onReload,
     ),
+    fileWatcher,
   )
 
   const decorate = decoration.decorate.bind(decoration)

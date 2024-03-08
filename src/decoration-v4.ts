@@ -54,10 +54,9 @@ export class DecorationV4 {
       this.logger.appendLine('Preset theme not found')
       return
     }
-    const cssPath = path.join(this.workspacePath, this.cssPath)
 
-    this.logger.appendLine(`Loading css from ${presetThemePath} and ${cssPath}`)
-    const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(cssPath, 'utf8')}`
+    this.logger.appendLine(`Loading css from ${presetThemePath} and ${this.cssPath}`)
+    const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
     this.textContentHashCache = []
 
