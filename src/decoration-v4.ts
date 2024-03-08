@@ -75,7 +75,6 @@ export class DecorationV4 {
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
     if (!openEditor || this.isFileIgnored(openEditor.document.fileName))
       return
-    this.logger.appendLine(`Decorating ${openEditor.document.fileName}`)
 
     const text = openEditor.document.getText()
 
@@ -124,7 +123,6 @@ export class DecorationV4 {
       return true
 
     const relativeFilePath = path.relative(this.workspacePath, filePath)
-    this.logger.appendLine(`Relative file path: ${relativeFilePath} ${this.ig?.ignores(relativeFilePath)}`)
     return this.ig?.ignores(relativeFilePath) ?? false
   }
 
