@@ -6,12 +6,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import ignore, { Ignore } from 'ignore'
 import {
   resolveModule,
 } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
+import { defaultIdeMatchInclude } from './utils'
 
 const LIMITED_CACHE_SIZE = 50
 
@@ -20,17 +22,11 @@ type NumberRange = {
   end: number
 }
 
-const defaultIdeMatchInclude = [
-  // String literals
-  /(["'`])[^\1]*?\1/g,
-  // CSS directives
-  /(@apply)[^;]*?;/g,
-]
-
 export class DecorationV4 {
   tailwindContext: any
-
   textContentHashCache: Array<[string, NumberRange[]]> = []
+
+  ig: Ignore | undefined
 
   constructor(
     private workspacePath: string,
@@ -64,12 +60,21 @@ export class DecorationV4 {
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
 
+    const gitignore = fs.readFileSync(path.join(this.workspacePath, '.gitignore'), 'utf8')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#'))
+
+    this.logger.appendLine(JSON.stringify(gitignore))
+    this.ig = ignore().add(gitignore)
+
     this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
-    if (!openEditor)
+    if (!openEditor || this.isFileIgnored(openEditor.document.fileName))
       return
+    this.logger.appendLine(`Decorating ${openEditor.document.fileName}`)
 
     const text = openEditor.document.getText()
 
@@ -108,6 +113,18 @@ export class DecorationV4 {
           openEditor.document.positionAt(end),
         )),
     )
+  }
+
+  private isFileIgnored(filePath: string) {
+    if (path.extname(filePath) === '.css')
+      return false
+
+    if (!path.isAbsolute(filePath))
+      return true
+
+    const relativeFilePath = path.relative(this.workspacePath, filePath)
+    this.logger.appendLine(`Relative file path: ${relativeFilePath} ${this.ig?.ignores(relativeFilePath)}`)
+    return this.ig?.ignores(relativeFilePath) ?? false
   }
 
   private extract(text: string) {

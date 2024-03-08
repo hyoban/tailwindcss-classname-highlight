@@ -11,6 +11,7 @@ import micromatch from 'micromatch'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
+import { defaultIdeMatchInclude } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
@@ -30,13 +31,6 @@ type NumberRange = {
   start: number
   end: number
 }
-
-const defaultIdeMatchInclude = [
-  // String literals
-  /(["'`])[^\1]*?\1/g,
-  // CSS directives
-  /(@apply)[^;]*?;/g,
-]
 
 export class Decoration {
   tailwindConfigFolderPath = ''
