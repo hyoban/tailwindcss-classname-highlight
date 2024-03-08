@@ -24,13 +24,6 @@ export async function activate(extContext: vscode.ExtensionContext) {
   logger.appendLine(`Detected Tailwind CSS version: ${tailwindcssPackageInfo.version}`)
 
   const isV4 = tailwindcssPackageInfo.version.startsWith('4')
-  const configration = vscode.workspace.getConfiguration()
-  const cssPath = configration.get<string>('tailwindcss-classname-highlight.cssPath') ?? ''
-  if (isV4 && !cssPath) {
-    logger.appendLine('You must set tailwindcss-classname-highlight.cssPath in your settings to use Tailwind CSS v4')
-    return
-  }
-  const cssFilePath = path.join(workspacePath, cssPath)
 
   const tailwindcssPackageEntry = resolveModule('tailwindcss', { paths: [workspacePath] })
   if (!tailwindcssPackageEntry) {
@@ -39,6 +32,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
   }
 
   let tailwindConfigPath = ''
+  let cssFilePath = ''
 
   if (!isV4) {
     const configPath = fg
@@ -57,6 +51,34 @@ export async function activate(extContext: vscode.ExtensionContext) {
     }
     logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
     tailwindConfigPath = configPath
+  }
+  else {
+    const configPath = fg
+      .globSync(
+        './**/*.css',
+        {
+          cwd: workspacePath,
+          ignore: ['**/node_modules/**'],
+        },
+      )
+      .map(p => path.join(workspacePath, p))
+      .filter(p => fs.existsSync(p))
+      .filter((p) => {
+        const content = fs.readFileSync(p, 'utf8')
+        const tailwindCSSRegex = [
+          /^@import "tailwindcss";/,
+          /^@import "tailwindcss\/preflight"/,
+          /^@import "tailwindcss\/utilities"/,
+          /^@import "tailwindcss\/theme"/,
+        ]
+        return tailwindCSSRegex.some(regex => regex.test(content))
+      })
+    if (configPath.length === 0) {
+      logger.appendLine('Tailwind CSS config file not found')
+      return
+    }
+    logger.appendLine(`Tailwind CSS config file found at ${configPath}`)
+    cssFilePath = configPath.at(0)!
   }
 
   const decoration = isV4

@@ -28,15 +28,6 @@
     "onStartupFinished"
   ],
   "contributes": {
-    "configuration": {
-      "title": "Tailwind CSS ClassName Highlight",
-      "properties": {
-        "tailwindcss-classname-highlight.cssPath": {
-          "description": "The path to the tailwindcss style file. (v4 only)",
-          "type": "string"
-        }
-      }
-    },
     "commands": [
       {
         "command": "tailwindcss-classname-highlight.reload",
