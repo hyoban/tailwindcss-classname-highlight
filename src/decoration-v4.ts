@@ -60,15 +60,16 @@ export class DecorationV4 {
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
 
-    const gitignore = fs.readFileSync(path.join(this.workspacePath, '.gitignore'), 'utf8')
+    this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
+
+    const gitignorePath = path.join(this.workspacePath, '.gitignore')
+    if (!fs.existsSync(gitignorePath))
+      return
+    const gitignore = fs.readFileSync(gitignorePath, 'utf8')
       .split('\n')
       .map(line => line.trim())
       .filter(line => line && !line.startsWith('#'))
-
-    this.logger.appendLine(JSON.stringify(gitignore))
     this.ig = ignore().add(gitignore)
-
-    this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
