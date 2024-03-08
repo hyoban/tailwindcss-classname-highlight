@@ -36,4 +36,4 @@ jobs:
         run: if npx should-semantic-release ; then npx release-it --verbose ; fi
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          VSCODE_EXTENSION_TOKEN: ${{secrets.VSCODE_EXTENSION_TOKEN}}
+          VSCE_PAT: ${{secrets.VSCODE_EXTENSION_TOKEN}}
