@@ -13,7 +13,7 @@ Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code
 - [ ] [Content Configuration](https://tailwindcss.com/docs/content-configuration) is set up correctly.
 
 > [!NOTE]
-> Reload the plugin after installing dependencies or changing configuration.
+> You may need reload the plugin after installing dependencies or changing configuration.
 
 If you want to use this extension with Tailwind CSS v4, you need to add the following configuration to your vscode settings:
 
