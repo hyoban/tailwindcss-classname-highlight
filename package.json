@@ -36,7 +36,13 @@
           "type": "string"
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "tailwindcss-classname-highlight.reload",
+        "title": "Tailwind CSS ClassName Highlight: Reload"
+      }
+    ]
   },
   "scripts": {
     "build": "tsup src/index.ts --external vscode",

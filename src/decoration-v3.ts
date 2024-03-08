@@ -32,7 +32,7 @@ type NumberRange = {
   end: number
 }
 
-export class Decoration {
+export class DecorationV3 {
   tailwindConfigFolderPath = ''
   tailwindContext: any
 
@@ -64,6 +64,7 @@ export class Decoration {
     const { loadConfig } = require(`${this.tailwindLibPath}/lib/lib/load-config.js`)
     const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`)
     this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
+    this.textContentHashCache = []
 
     this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }

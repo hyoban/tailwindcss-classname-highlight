@@ -5,7 +5,7 @@ import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
-import { Decoration } from './decoration-v3'
+import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 
 export async function activate(extContext: vscode.ExtensionContext) {
@@ -66,7 +66,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
       tailwindcssPackageEntry.replaceAll('.mjs', '.js'),
       cssPath,
     )
-    : new Decoration(
+    : new DecorationV3(
       workspacePath,
       logger,
       decorationType,
@@ -76,6 +76,17 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   if (!decoration.checkContext())
     return
+
+  extContext.subscriptions.push(
+    vscode.commands.registerCommand(
+      'tailwindcss-classname-highlight.reload',
+      () => {
+        decoration.updateTailwindContext()
+        for (const element of vscode.window.visibleTextEditors)
+          decoration.decorate(element)
+      },
+    ),
+  )
 
   const decorate = decoration.decorate.bind(decoration)
 
