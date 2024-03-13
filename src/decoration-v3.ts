@@ -11,6 +11,7 @@ import micromatch from 'micromatch'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
+import { loadConfig } from './load-config'
 import { defaultIdeMatchInclude } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
@@ -61,7 +62,6 @@ export class DecorationV3 {
 
     delete require.cache[require.resolve(this.tailwindConfigPath)]
     const { createContext } = require(`${this.tailwindLibPath}/lib/lib/setupContextUtils.js`)
-    const { loadConfig } = require(`${this.tailwindLibPath}/lib/lib/load-config.js`)
     const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`)
     this.tailwindContext = createContext(resolveConfig(loadConfig(this.tailwindConfigPath)))
     this.textContentHashCache = []
