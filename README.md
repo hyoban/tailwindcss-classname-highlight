@@ -8,9 +8,15 @@ Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code
 
 ## Not working?
 
+### I don't see any highlighting?
+
 - [ ] Ensure [Tailwind](https://tailwindcss.com/docs/installation) is installed.
 - [ ] [Tailwind configuration file](https://tailwindcss.com/docs/configuration) exists in workspace.
 - [ ] [Content Configuration](https://tailwindcss.com/docs/content-configuration) is set up correctly.
+
+### I see highlighting but some classes should not be highlighted?
+
+This is [how Tailwind works](https://tailwindcss.com/docs/content-configuration#class-detection-in-depth) when detecting in your code. And we have already applied [the same filtering strategy](https://github.com/unocss/unocss/issues/3278) as UnoCSS.
 
 > [!NOTE]
 > You may need reload the plugin after installing dependencies or changing configuration.
