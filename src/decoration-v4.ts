@@ -18,8 +18,8 @@ import { defaultIdeMatchInclude } from './utils'
 const LIMITED_CACHE_SIZE = 50
 
 type NumberRange = {
-  start: number
-  end: number
+  start: number,
+  end: number,
 }
 
 export class DecorationV4 {

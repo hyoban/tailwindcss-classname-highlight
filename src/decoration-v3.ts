@@ -2,7 +2,6 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
 /* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'node:path'
@@ -22,15 +21,15 @@ type GenerateRules = Array<[
   {
     raws: {
       tailwind: {
-        candidate: string
-      }
-    }
+        candidate: string,
+      },
+    },
   },
 ]>
 
 type NumberRange = {
-  start: number
-  end: number
+  start: number,
+  end: number,
 }
 
 export class DecorationV3 {
