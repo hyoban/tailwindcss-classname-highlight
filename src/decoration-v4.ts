@@ -17,7 +17,7 @@ import { defaultIdeMatchInclude } from './utils'
 
 const LIMITED_CACHE_SIZE = 50
 
-type NumberRange = {
+interface NumberRange {
   start: number,
   end: number,
 }

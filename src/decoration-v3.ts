@@ -27,7 +27,7 @@ type GenerateRules = Array<[
   },
 ]>
 
-type NumberRange = {
+interface NumberRange {
   start: number,
   end: number,
 }
