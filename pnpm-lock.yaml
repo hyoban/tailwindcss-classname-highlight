@@ -45,8 +45,8 @@ importers:
         specifier: ^17.1.1
         version: 17.1.1(typescript@5.4.3)
       release-it-pnpm:
-        specifier: 4.1.6
-        version: 4.1.6(release-it@17.1.1)
+        specifier: 4.1.8
+        version: 4.1.8(release-it@17.1.1)
       sucrase:
         specifier: ^3.35.0
         version: 3.35.0
@@ -5381,8 +5381,8 @@ packages:
       jsesc: 0.5.0
     dev: true
 
-  /release-it-pnpm@4.1.6(release-it@17.1.1):
-    resolution: {integrity: sha512-hDewi/V8yrOPd9WiZ6ZcH/8QqhC9ZhYwgrU59JZTvCtN34VTYorpYO9/sEb2VyiVnqFFnGuffoCPnAhjIUvXmQ==}
+  /release-it-pnpm@4.1.8(release-it@17.1.1):
+    resolution: {integrity: sha512-bTV2JvmXlmjYKUQUntDhW1kqtgEA5k0D1o9q3Tf46vCPSCwHD5lBlHoh47Ey0aZ+g0DGauqDiRpA0kJApnHaFg==}
     hasBin: true
     peerDependencies:
       release-it: ^17.0.0
