@@ -6,7 +6,7 @@
 
 Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code Extension](https://unocss.dev/integrations/vscode)
 
-## Not working?
+## Q & A
 
 > [!NOTE]
 > You may need reload the plugin after installing dependencies or changing configuration.
