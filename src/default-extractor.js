@@ -1,31 +1,31 @@
 // https://github.com/tailwindlabs/tailwindcss/blob/4429ab80101bdebcb3e84e817201beb69f05fc3b/src/lib/defaultExtractor.js#L27
 
-import * as regex from './regex'
+import * as regex from "./regex";
 
 export function defaultExtractor(separator) {
-  let patterns = [...buildRegExps(separator)]
+  let patterns = [...buildRegExps(separator)];
 
   /**
    * @param {string} content
    */
   return (content) => {
     /** @type {(string|string)[]} */
-    let results = []
+    let results = [];
 
     for (let pattern of patterns) {
       for (let result of content.match(pattern) ?? [])
-        results.push(clipAtBalancedParens(result))
+        results.push(clipAtBalancedParens(result));
     }
 
-    return results
-  }
+    return results;
+  };
 }
 
 function* buildRegExps(separator) {
-  let prefix
-    = separator !== ''
+  let prefix =
+    separator !== ""
       ? regex.optional(regex.pattern([/-?/, regex.escape(separator)]))
-      : ''
+      : "";
 
   let utility = regex.any([
     // Arbitrary properties (without square brackets)
@@ -87,7 +87,7 @@ function* buildRegExps(separator) {
         ]),
       ),
     ]),
-  ])
+  ]);
 
   let variantPatterns = [
     // Without quotes
@@ -110,14 +110,14 @@ function* buildRegExps(separator) {
       regex.pattern([/([^\s"'[\\`]+-)?\[[^\s`]+]/, separator]),
       regex.pattern([/[^\s[\\`]+/, separator]),
     ]),
-  ]
+  ];
 
   for (const variantPattern of variantPatterns) {
     yield regex.pattern([
       // Variants
-      '((?=((',
+      "((?=((",
       variantPattern,
-      ')+))\\2)?',
+      ")+))\\2)?",
 
       // Important (optional)
       /!?/,
@@ -125,17 +125,17 @@ function* buildRegExps(separator) {
       prefix,
 
       utility,
-    ])
+    ]);
   }
 
   // 5. Inner matches
-  yield /[^\s"#$%'().<=>[\]`{}]*[^\s"#$%'().:<=>[\]`{}]/g
+  yield /[^\s"#$%'().<=>[\]`{}]*[^\s"#$%'().:<=>[\]`{}]/g;
 }
 
 // We want to capture any "special" characters
 // AND the characters immediately following them (if there is one)
-let SPECIALS = /(["'[\]`])([^"'[\]`])?/g
-let ALLOWED_CLASS_CHARACTERS = /[^\s"'<>\]`]+/
+let SPECIALS = /(["'[\]`])([^"'[\]`])?/g;
+let ALLOWED_CLASS_CHARACTERS = /[^\s"'<>\]`]+/;
 
 /**
  * Clips a string ensuring that parentheses, quotes, etc… are balanced
@@ -153,58 +153,52 @@ let ALLOWED_CLASS_CHARACTERS = /[^\s"'<>\]`]+/
  */
 function clipAtBalancedParens(input) {
   // We are care about this for arbitrary values
-  if (!input.includes('-['))
-    return input
+  if (!input.includes("-[")) return input;
 
-  let depth = 0
-  let openStringTypes = []
+  let depth = 0;
+  let openStringTypes = [];
 
   // Find all parens, brackets, quotes, etc
   // Stop when we end at a balanced pair
   // This is naive and will treat mismatched parens as balanced
   // This shouldn't be a problem in practice though
-  let matches = input.matchAll(SPECIALS)
+  let matches = input.matchAll(SPECIALS);
 
   // We can't use lookbehind assertions because we have to support Safari
   // So, instead, we've emulated it using capture groups and we'll re-work the matches to accommodate
   matches = [...matches].flatMap((match) => {
-    const [, ...groups] = match
+    const [, ...groups] = match;
 
     return groups.map((group, idx) =>
       Object.assign([], match, {
         index: match.index + idx,
         0: group,
       }),
-    )
-  })
+    );
+  });
 
   for (let match of matches) {
-    let char = match[0]
-    let inStringType = openStringTypes.at(-1)
+    let char = match[0];
+    let inStringType = openStringTypes.at(-1);
 
-    if (char === inStringType)
-      openStringTypes.pop()
-
-    else if (char === '\'' || char === '"' || char === '`')
-      openStringTypes.push(char)
+    if (char === inStringType) openStringTypes.pop();
+    else if (char === "'" || char === '"' || char === "`")
+      openStringTypes.push(char);
 
     if (inStringType) {
-      continue
-    }
-    else if (char === '[') {
-      depth++
-      continue
-    }
-    else if (char === ']') {
-      depth--
-      continue
+      continue;
+    } else if (char === "[") {
+      depth++;
+      continue;
+    } else if (char === "]") {
+      depth--;
+      continue;
     }
 
     // We've gone one character past the point where we should stop
     // This means that there was an extra closing `]`
     // We'll clip to just before it
-    if (depth < 0)
-      return input.slice(0, Math.max(0, match.index - 1))
+    if (depth < 0) return input.slice(0, Math.max(0, match.index - 1));
 
     // We've finished balancing the brackets but there still may be characters that can be included
     // For example in the class `text-[#336699]/[.35]`
@@ -212,10 +206,10 @@ function clipAtBalancedParens(input) {
 
     // If we're at zero and encounter a non-class character then we clip the class there
     if (depth === 0 && !ALLOWED_CLASS_CHARACTERS.test(char))
-      return input.slice(0, Math.max(0, match.index))
+      return input.slice(0, Math.max(0, match.index));
   }
 
-  return input
+  return input;
 }
 
 // Regular utilities

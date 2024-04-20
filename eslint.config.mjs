@@ -1,3 +1,3 @@
-import hyoban from 'eslint-config-hyoban'
+import hyoban from "eslint-config-hyoban";
 
-export default hyoban({ react: false })
+export default hyoban({ react: false });

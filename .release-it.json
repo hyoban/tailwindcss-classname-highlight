@@ -7,10 +7,7 @@
     "tagName": "v${version}"
   },
   "hooks": {
-    "before:init": [
-      "pnpm run lint",
-      "pnpm run typecheck"
-    ],
+    "before:init": ["pnpm run lint", "pnpm run typecheck", "pnpm run build"],
     "before:release": "pnpm run publish"
   }
 }
