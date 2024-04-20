@@ -8,6 +8,9 @@ Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code
 
 ## Not working?
 
+> [!NOTE]
+> You may need reload the plugin after installing dependencies or changing configuration.
+
 ### I don't see any highlighting?
 
 - [ ] Ensure [Tailwind](https://tailwindcss.com/docs/installation) is installed.
@@ -18,5 +21,12 @@ Highlight valid Tailwind CSS class names in your code, idea from [UnoCSS VS Code
 
 This is [how Tailwind works](https://tailwindcss.com/docs/content-configuration#class-detection-in-depth) when detecting in your code. And we have already applied [the same filtering strategy](https://github.com/unocss/unocss/issues/3278) as UnoCSS.
 
-> [!NOTE]
-> You may need reload the plugin after installing dependencies or changing configuration.
+### Does it support Tailwind V4?
+
+Yes, it does.
+
+### Does it work with monorepo?
+
+Yes. It will detect all tailwind configurations in your workspace and use different configurations for different packages.
+
+Currently, it does not support tailwind V4.
