@@ -35,7 +35,6 @@ interface NumberRange {
 }
 
 export class DecorationV3 {
-  tailwindConfigFolderPath = "";
   tailwindContext: any;
 
   textContentHashCache: Array<[string, NumberRange[]]> = [];
@@ -47,7 +46,6 @@ export class DecorationV3 {
     private tailwindLibPath: string,
     private tailwindConfigPath: string,
   ) {
-    this.tailwindConfigFolderPath = path.dirname(this.tailwindConfigPath);
     try {
       this.updateTailwindContext();
     } catch (error) {
@@ -132,7 +130,7 @@ export class DecorationV3 {
   private isFileMatched(filePath: string) {
     if (path.extname(filePath) === ".css") return true;
     const relativeFilePath = path.relative(
-      this.tailwindConfigFolderPath,
+      path.dirname(this.tailwindConfigPath),
       filePath,
     );
     const contentFilesPath =
