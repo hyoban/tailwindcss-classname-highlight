@@ -9,9 +9,10 @@ import { DecorationV3 } from "./decoration-v3";
 import { DecorationV4 } from "./decoration-v4";
 
 export async function activate(extContext: vscode.ExtensionContext) {
-  const workspacePath =
-    vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "";
-  if (!workspacePath) return;
+  const workspacePath
+    = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? "";
+  if (!workspacePath)
+    return;
 
   const logger = vscode.window.createOutputChannel(
     "Tailwind CSS ClassName Highlight",
@@ -27,8 +28,8 @@ export async function activate(extContext: vscode.ExtensionContext) {
       cwd: workspacePath,
       ignore: ["**/node_modules/**"],
     })
-    .map((p) => path.join(workspacePath, p));
-  let tailwindV3PackageEntryList: string[] = tailwindV3ConfigPathList.map((p) =>
+    .map(p => path.join(workspacePath, p));
+  let tailwindV3PackageEntryList: string[] = tailwindV3ConfigPathList.map(p =>
     resolveModule("tailwindcss", { paths: [p] }),
   ) as string[];
   if (tailwindV3PackageEntryList.length > 0) {
@@ -42,9 +43,9 @@ export async function activate(extContext: vscode.ExtensionContext) {
     paths: [workspacePath],
   });
   if (
-    (!workspaceTailwindPackageInfo?.version ||
-      !workspaceTailwindPackageInfo?.rootPath) &&
-    tailwindV3ConfigPathList.length === 0
+    (!workspaceTailwindPackageInfo?.version
+    || !workspaceTailwindPackageInfo?.rootPath)
+    && tailwindV3ConfigPathList.length === 0
   ) {
     logger.appendLine("Tailwind CSS package not found");
     return;
@@ -52,9 +53,10 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   if (tailwindV3ConfigPathList.length > 1) {
     logger.appendLine(
-      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPathList.map((p) => p).join(", ")}`,
+      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPathList.map(p => p).join(", ")}`,
     );
-  } else {
+  }
+  else {
     logger.appendLine(
       `Detected Tailwind CSS version: ${workspaceTailwindPackageInfo?.version}`,
     );
@@ -78,8 +80,8 @@ export async function activate(extContext: vscode.ExtensionContext) {
         cwd: workspacePath,
         ignore: ["**/node_modules/**"],
       })
-      .map((p) => path.join(workspacePath, p))
-      .filter((p) => fs.existsSync(p))
+      .map(p => path.join(workspacePath, p))
+      .filter(p => fs.existsSync(p))
       .filter((p) => {
         const content = fs.readFileSync(p, "utf8");
         const tailwindCSSRegex = [
@@ -88,7 +90,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
           /^@import (["'])tailwindcss\/utilities\1/,
           /^@import (["'])tailwindcss\/theme\1/,
         ];
-        return tailwindCSSRegex.some((regex) => regex.test(content));
+        return tailwindCSSRegex.some(regex => regex.test(content));
       });
     if (configPath.length === 0) {
       logger.appendLine("Tailwind CSS config file not found");
@@ -109,26 +111,26 @@ export async function activate(extContext: vscode.ExtensionContext) {
         ),
       ]
     : tailwindV3PackageEntryList.map(
-        (tailwindcssPackageEntry, index) =>
-          new DecorationV3(
-            workspacePath,
-            logger,
-            decorationType,
-            path.resolve(tailwindcssPackageEntry, "../../"),
-            tailwindConfigPath.at(index)!,
-          ),
-      );
+      (tailwindcssPackageEntry, index) =>
+        new DecorationV3(
+          workspacePath,
+          logger,
+          decorationType,
+          path.resolve(tailwindcssPackageEntry, "../../"),
+          tailwindConfigPath.at(index)!,
+        ),
+    );
 
-  if (!decorationList.some((i) => i.checkContext())) return;
+  if (!decorationList.some(i => i.checkContext()))
+    return;
 
   const onReload = () => {
-    for (const i of decorationList) {
+    for (const i of decorationList)
       i.updateTailwindContext();
-    }
+
     for (const element of vscode.window.visibleTextEditors) {
-      for (const i of decorationList) {
+      for (const i of decorationList)
         i.decorate(element);
-      }
     }
   };
 
@@ -149,28 +151,28 @@ export async function activate(extContext: vscode.ExtensionContext) {
   // on activation
   const openEditors = vscode.window.visibleTextEditors;
   for (const element of openEditors) {
-    for (const i of decorationList) {
+    for (const i of decorationList)
       i.decorate(element);
-    }
   }
 
   // on editor change
   extContext.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (!editor) return;
-      for (const i of decorationList) {
+      if (!editor)
+        return;
+      for (const i of decorationList)
         i.decorate(editor);
-      }
     }),
     vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.languageId === "Log") return;
+      if (event.document.languageId === "Log")
+        return;
       const openEditor = vscode.window.visibleTextEditors.find(
-        (editor) => editor.document.uri === event.document.uri,
+        editor => editor.document.uri === event.document.uri,
       );
-      if (!openEditor) return;
-      for (const i of decorationList) {
+      if (!openEditor)
+        return;
+      for (const i of decorationList)
         i.decorate(openEditor);
-      }
     }),
   );
 }

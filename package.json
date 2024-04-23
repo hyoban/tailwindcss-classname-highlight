@@ -4,7 +4,7 @@
   "displayName": "Tailwind CSS ClassName Highlight",
   "version": "0.5.0",
   "private": true,
-  "packageManager": "pnpm@9.0.4",
+  "packageManager": "pnpm@9.0.5",
   "description": "",
   "author": "Stephen Zhou <hi@hyoban.cc>",
   "license": "MIT",
@@ -41,11 +41,10 @@
   "scripts": {
     "build": "tsup src/index.ts --external vscode",
     "dev": "pnpm build --watch",
-    "lint": "prettier --list-different . && eslint",
-    "lint:fix": "prettier --list-different --write . && eslint --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "pack": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",
-    "release": "release-it",
     "test": "vitest",
     "typecheck": "tsc",
     "vscode:prepublish": "pnpm build"
@@ -55,19 +54,16 @@
     "@types/node": "20.11.30",
     "@types/vscode": "1.84.0",
     "@vscode/vsce": "^2.26.0",
-    "eslint": "^9.1.0",
-    "eslint-config-hyoban": "^1.0.3",
+    "eslint": "^9.1.1",
+    "eslint-config-hyoban": "^2.1.0",
     "fast-glob": "^3.3.2",
     "ignore": "^5.3.1",
     "jiti": "^1.21.0",
     "local-pkg": "^0.5.0",
     "micromatch": "^4.0.5",
-    "prettier": "^3.2.5",
-    "prettier-config-hyoban": "^2.0.2",
     "sucrase": "^3.35.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
     "vitest": "^1.5.0"
-  },
-  "prettier": "prettier-config-hyoban"
+  }
 }

@@ -22,16 +22,16 @@ type GenerateRules = Array<
     {
       raws: {
         tailwind: {
-          candidate: string;
-        };
-      };
+          candidate: string,
+        },
+      },
     },
   ]
 >;
 
 interface NumberRange {
-  start: number;
-  end: number;
+  start: number,
+  end: number,
 }
 
 export class DecorationV3 {
@@ -48,11 +48,13 @@ export class DecorationV3 {
   ) {
     try {
       this.updateTailwindContext();
-    } catch (error) {
-      if (error instanceof Error)
+    }
+    catch (error) {
+      if (error instanceof Error) {
         this.logger.appendLine(
           `Error updating Tailwind CSS context: ${error.message}`,
         );
+      }
     }
   }
 
@@ -84,7 +86,8 @@ export class DecorationV3 {
     let crypto: typeof import("node:crypto") | undefined;
     try {
       crypto = require("node:crypto");
-    } catch {
+    }
+    catch {
       /* empty */
     }
 
@@ -100,7 +103,8 @@ export class DecorationV3 {
       );
       if (cached) {
         numberRange = cached[1];
-      } else {
+      }
+      else {
         numberRange = this.extract(text);
         this.textContentHashCache.unshift([
           currentTextContentHash,
@@ -111,7 +115,8 @@ export class DecorationV3 {
           LIMITED_CACHE_SIZE,
         );
       }
-    } else {
+    }
+    else {
       numberRange = this.extract(text);
     }
 
@@ -128,19 +133,20 @@ export class DecorationV3 {
   }
 
   private isFileMatched(filePath: string) {
-    if (path.extname(filePath) === ".css") return true;
+    if (path.extname(filePath) === ".css")
+      return true;
     const relativeFilePath = path.relative(
       path.dirname(this.tailwindConfigPath),
       filePath,
     );
-    const contentFilesPath =
-      this.tailwindContext?.tailwindConfig?.content?.files ?? ([] as string[]);
+    const contentFilesPath
+      = this.tailwindContext?.tailwindConfig?.content?.files ?? ([] as string[]);
     return micromatch.isMatch(relativeFilePath, contentFilesPath);
   }
 
   private extract(text: string) {
-    const includedTextWithRange: Array<{ text: string; range: NumberRange }> =
-      [];
+    const includedTextWithRange: Array<{ text: string, range: NumberRange }>
+      = [];
 
     for (const regex of defaultIdeMatchInclude) {
       for (const match of text.matchAll(regex)) {
@@ -157,10 +163,10 @@ export class DecorationV3 {
     const extracted = defaultExtractor(
       this.tailwindContext.tailwindConfig.separator,
     )(
+      // rewrite @apply border-border; -> @apply border-border ;
+      // add space before the final semicolon
       /(@apply)[^;]*?;/g.test(text)
-        ? // rewrite @apply border-border; -> @apply border-border ;
-          // add space before the final semicolon
-          text.replaceAll(/(@apply[^;]*?)(;)/g, "$1 ;")
+        ? text.replaceAll(/(@apply[^;]*?)(;)/g, "$1 ;")
         : text,
     ) as string[];
     const generatedRules = generateRules(
@@ -186,8 +192,8 @@ export class DecorationV3 {
       const start = text.indexOf(value, index);
       const end = start + value.length;
       if (
-        generatedCandidates.has(value) &&
-        includedTextWithRange.some(
+        generatedCandidates.has(value)
+        && includedTextWithRange.some(
           ({ range }) => range.start <= start && range.end >= end,
         )
       )

@@ -9,7 +9,7 @@ const REGEX_HAS_SPECIAL = new RegExp(REGEX_SPECIAL.source);
 function toSource(source) {
   source = Array.isArray(source) ? source : [source];
 
-  source = source.map((item) => (item instanceof RegExp ? item.source : item));
+  source = source.map(item => (item instanceof RegExp ? item.source : item));
 
   return source.join("");
 }
@@ -32,7 +32,7 @@ export function withoutCapturing(source) {
  * @param {Array<string|RegExp>} sources
  */
 export function any(sources) {
-  return `(?:${sources.map((element) => toSource(element)).join("|")})`;
+  return `(?:${sources.map(element => toSource(element)).join("|")})`;
 }
 
 /**
@@ -66,7 +66,7 @@ export function nestedBrackets(open, close, depth = 1) {
       : any([
           `[^${escape(open)}${escape(close)}s]*`,
           nestedBrackets(open, close, depth - 1),
-        ]),
+      ]),
     /\S*/,
     escape(close),
   ]);

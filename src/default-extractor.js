@@ -22,8 +22,8 @@ export function defaultExtractor(separator) {
 }
 
 function* buildRegExps(separator) {
-  let prefix =
-    separator !== ""
+  let prefix
+    = separator !== ""
       ? regex.optional(regex.pattern([/-?/, regex.escape(separator)]))
       : "";
 
@@ -153,7 +153,8 @@ let ALLOWED_CLASS_CHARACTERS = /[^\s"'<>\]`]+/;
  */
 function clipAtBalancedParens(input) {
   // We are care about this for arbitrary values
-  if (!input.includes("-[")) return input;
+  if (!input.includes("-["))
+    return input;
 
   let depth = 0;
   let openStringTypes = [];
@@ -181,16 +182,19 @@ function clipAtBalancedParens(input) {
     let char = match[0];
     let inStringType = openStringTypes.at(-1);
 
-    if (char === inStringType) openStringTypes.pop();
-    else if (char === "'" || char === '"' || char === "`")
+    if (char === inStringType)
+      openStringTypes.pop();
+    else if (char === "'" || char === "\"" || char === "`")
       openStringTypes.push(char);
 
     if (inStringType) {
       continue;
-    } else if (char === "[") {
+    }
+    else if (char === "[") {
       depth++;
       continue;
-    } else if (char === "]") {
+    }
+    else if (char === "]") {
       depth--;
       continue;
     }
@@ -198,7 +202,8 @@ function clipAtBalancedParens(input) {
     // We've gone one character past the point where we should stop
     // This means that there was an extra closing `]`
     // We'll clip to just before it
-    if (depth < 0) return input.slice(0, Math.max(0, match.index - 1));
+    if (depth < 0)
+      return input.slice(0, Math.max(0, match.index - 1));
 
     // We've finished balancing the brackets but there still may be characters that can be included
     // For example in the class `text-[#336699]/[.35]`

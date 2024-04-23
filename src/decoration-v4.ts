@@ -16,8 +16,8 @@ import { defaultIdeMatchInclude } from "./utils";
 const LIMITED_CACHE_SIZE = 50;
 
 interface NumberRange {
-  start: number;
-  end: number;
+  start: number,
+  end: number,
 }
 
 export class DecorationV4 {
@@ -35,11 +35,13 @@ export class DecorationV4 {
   ) {
     try {
       this.updateTailwindContext();
-    } catch (error) {
-      if (error instanceof Error)
+    }
+    catch (error) {
+      if (error instanceof Error) {
         this.logger.appendLine(
           `Error updating Tailwind CSS context${error.message}`,
         );
+      }
     }
   }
 
@@ -68,24 +70,27 @@ export class DecorationV4 {
     );
 
     const gitignorePath = path.join(this.workspacePath, ".gitignore");
-    if (!fs.existsSync(gitignorePath)) return;
+    if (!fs.existsSync(gitignorePath))
+      return;
     const gitignore = fs
       .readFileSync(gitignorePath, "utf8")
       .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("#"));
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith("#"));
     this.ig = ignore().add(gitignore);
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
-    if (!openEditor || this.isFileIgnored(openEditor.document.fileName)) return;
+    if (!openEditor || this.isFileIgnored(openEditor.document.fileName))
+      return;
 
     const text = openEditor.document.getText();
 
     let crypto: typeof import("node:crypto") | undefined;
     try {
       crypto = require("node:crypto");
-    } catch {
+    }
+    catch {
       /* empty */
     }
 
@@ -101,7 +106,8 @@ export class DecorationV4 {
       );
       if (cached) {
         numberRange = cached[1];
-      } else {
+      }
+      else {
         numberRange = this.extract(text);
         this.textContentHashCache.unshift([
           currentTextContentHash,
@@ -112,7 +118,8 @@ export class DecorationV4 {
           LIMITED_CACHE_SIZE,
         );
       }
-    } else {
+    }
+    else {
       numberRange = this.extract(text);
     }
 
@@ -129,17 +136,19 @@ export class DecorationV4 {
   }
 
   private isFileIgnored(filePath: string) {
-    if (path.extname(filePath) === ".css") return false;
+    if (path.extname(filePath) === ".css")
+      return false;
 
-    if (!path.isAbsolute(filePath)) return true;
+    if (!path.isAbsolute(filePath))
+      return true;
 
     const relativeFilePath = path.relative(this.workspacePath, filePath);
     return this.ig?.ignores(relativeFilePath) ?? false;
   }
 
   private extract(text: string) {
-    const includedTextWithRange: Array<{ text: string; range: NumberRange }> =
-      [];
+    const includedTextWithRange: Array<{ text: string, range: NumberRange }>
+      = [];
 
     for (const regex of defaultIdeMatchInclude) {
       for (const match of text.matchAll(regex)) {
@@ -151,10 +160,10 @@ export class DecorationV4 {
     }
 
     const extracted = defaultExtractor(":")(
+      // rewrite @apply border-border; -> @apply border-border ;
+      // add space before the final semicolon
       /(@apply)[^;]*?;/g.test(text)
-        ? // rewrite @apply border-border; -> @apply border-border ;
-          // add space before the final semicolon
-          text.replaceAll(/(@apply[^;]*?)(;)/g, "$1 ;")
+        ? text.replaceAll(/(@apply[^;]*?)(;)/g, "$1 ;")
         : text,
     ) as string[];
 
@@ -171,8 +180,8 @@ export class DecorationV4 {
       const start = text.indexOf(value, index);
       const end = start + value.length;
       if (
-        generatedCandidates.has(value) &&
-        includedTextWithRange.some(
+        generatedCandidates.has(value)
+        && includedTextWithRange.some(
           ({ range }) => range.start <= start && range.end >= end,
         )
       )
