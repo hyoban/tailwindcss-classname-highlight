@@ -83,10 +83,10 @@ export async function activate(extContext: vscode.ExtensionContext) {
       .filter((p) => {
         const content = fs.readFileSync(p, "utf8");
         const tailwindCSSRegex = [
-          /^@import "tailwindcss";/,
-          /^@import "tailwindcss\/preflight"/,
-          /^@import "tailwindcss\/utilities"/,
-          /^@import "tailwindcss\/theme"/,
+          /^@import (["'])tailwindcss\1;/,
+          /^@import (["'])tailwindcss\/preflight\1/,
+          /^@import (["'])tailwindcss\/utilities\1/,
+          /^@import (["'])tailwindcss\/theme\1/,
         ];
         return tailwindCSSRegex.some((regex) => regex.test(content));
       });
