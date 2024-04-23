@@ -2,7 +2,7 @@
   "publisher": "hyoban",
   "name": "tailwindcss-classname-highlight",
   "displayName": "Tailwind CSS ClassName Highlight",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "packageManager": "pnpm@9.0.5",
   "description": "",
