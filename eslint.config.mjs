@@ -1,3 +1,3 @@
-import hyoban from "eslint-config-hyoban";
+import hyoban from 'eslint-config-hyoban'
 
-export default hyoban({ stylistic: { semi: true, quotes: "double" } });
+export default hyoban()

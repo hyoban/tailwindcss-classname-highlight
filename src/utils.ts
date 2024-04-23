@@ -3,4 +3,4 @@ export const defaultIdeMatchInclude = [
   /(["'`])[^\1]*?\1/g,
   // CSS directives
   /(@apply)[^;]*?;/g,
-];
+]

@@ -4,17 +4,17 @@
 
 /* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import path from "node:path";
+import path from 'node:path'
 
-import micromatch from "micromatch";
-import * as vscode from "vscode";
+import micromatch from 'micromatch'
+import * as vscode from 'vscode'
 
-import { defaultExtractor } from "./default-extractor";
-import { loadConfig } from "./load-config";
-import { defaultIdeMatchInclude } from "./utils";
+import { defaultExtractor } from './default-extractor'
+import { loadConfig } from './load-config'
+import { defaultIdeMatchInclude } from './utils'
 
-const CHECK_CONTEXT_MESSAGE_PREFIX = "Check context failed: ";
-const LIMITED_CACHE_SIZE = 50;
+const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
+const LIMITED_CACHE_SIZE = 50
 
 type GenerateRules = Array<
   [
@@ -27,7 +27,7 @@ type GenerateRules = Array<
       },
     },
   ]
->;
+>
 
 interface NumberRange {
   start: number,
@@ -35,9 +35,9 @@ interface NumberRange {
 }
 
 export class DecorationV3 {
-  tailwindContext: any;
+  tailwindContext: any
 
-  textContentHashCache: Array<[string, NumberRange[]]> = [];
+  textContentHashCache: Array<[string, NumberRange[]]> = []
 
   constructor(
     private workspacePath: string,
@@ -47,77 +47,77 @@ export class DecorationV3 {
     private tailwindConfigPath: string,
   ) {
     try {
-      this.updateTailwindContext();
+      this.updateTailwindContext()
     }
     catch (error) {
       if (error instanceof Error) {
         this.logger.appendLine(
           `Error updating Tailwind CSS context: ${error.message}`,
-        );
+        )
       }
     }
   }
 
   updateTailwindContext() {
-    const now = Date.now();
-    this.logger.appendLine("Updating Tailwind CSS context");
+    const now = Date.now()
+    this.logger.appendLine('Updating Tailwind CSS context')
 
-    delete require.cache[require.resolve(this.tailwindConfigPath)];
+    delete require.cache[require.resolve(this.tailwindConfigPath)]
     const { createContext } = require(
       `${this.tailwindLibPath}/lib/lib/setupContextUtils.js`,
-    );
-    const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`);
+    )
+    const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`)
     this.tailwindContext = createContext(
       resolveConfig(loadConfig(this.tailwindConfigPath)),
-    );
-    this.textContentHashCache = [];
+    )
+    this.textContentHashCache = []
 
     this.logger.appendLine(
       `Tailwind CSS context updated in ${Date.now() - now}ms`,
-    );
+    )
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
     if (!openEditor || !this.isFileMatched(openEditor.document.uri.fsPath))
-      return;
+      return
 
-    const text = openEditor.document.getText();
+    const text = openEditor.document.getText()
 
-    let crypto: typeof import("node:crypto") | undefined;
+    let crypto: typeof import('node:crypto') | undefined
     try {
-      crypto = require("node:crypto");
+      crypto = require('node:crypto')
     }
     catch {
       /* empty */
     }
 
     const currentTextContentHash = crypto
-      ? crypto.createHash("md5").update(text).digest("hex")
-      : "";
+      ? crypto.createHash('md5').update(text).digest('hex')
+      : ''
 
-    let numberRange: NumberRange[] = [];
+    let numberRange: NumberRange[] = []
 
     if (crypto) {
       const cached = this.textContentHashCache.find(
         ([hash]) => hash === currentTextContentHash,
-      );
+      )
       if (cached) {
-        numberRange = cached[1];
+        numberRange = cached[1]
       }
       else {
-        numberRange = this.extract(text);
+        numberRange = this.extract(text)
         this.textContentHashCache.unshift([
           currentTextContentHash,
           numberRange,
-        ]);
+        ])
         this.textContentHashCache.length = Math.min(
           this.textContentHashCache.length,
           LIMITED_CACHE_SIZE,
-        );
+        )
       }
     }
     else {
-      numberRange = this.extract(text);
+      numberRange = this.extract(text)
     }
 
     openEditor.setDecorations(
@@ -129,50 +129,50 @@ export class DecorationV3 {
             openEditor.document.positionAt(end),
           ),
       ),
-    );
+    )
   }
 
   private isFileMatched(filePath: string) {
-    if (path.extname(filePath) === ".css")
-      return true;
+    if (path.extname(filePath) === '.css')
+      return true
     const relativeFilePath = path.relative(
       path.dirname(this.tailwindConfigPath),
       filePath,
-    );
+    )
     const contentFilesPath
-      = this.tailwindContext?.tailwindConfig?.content?.files ?? ([] as string[]);
-    return micromatch.isMatch(relativeFilePath, contentFilesPath);
+      = this.tailwindContext?.tailwindConfig?.content?.files ?? ([] as string[])
+    return micromatch.isMatch(relativeFilePath, contentFilesPath)
   }
 
   private extract(text: string) {
     const includedTextWithRange: Array<{ text: string, range: NumberRange }>
-      = [];
+      = []
 
     for (const regex of defaultIdeMatchInclude) {
       for (const match of text.matchAll(regex)) {
         includedTextWithRange.push({
           text: match[0],
           range: { start: match.index!, end: match.index! + match[0].length },
-        });
+        })
       }
     }
 
     const { generateRules } = require(
       `${this.tailwindLibPath}/lib/lib/generateRules.js`,
-    );
+    )
     const extracted = defaultExtractor(
       this.tailwindContext.tailwindConfig.separator,
     )(
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
       /(@apply)[^;]*?;/g.test(text)
-        ? text.replaceAll(/(@apply[^;]*?)(;)/g, "$1 ;")
+        ? text.replaceAll(/(@apply[^;]*?)(;)/g, '$1 ;')
         : text,
-    ) as string[];
+    ) as string[]
     const generatedRules = generateRules(
       extracted,
       this.tailwindContext,
-    ) as GenerateRules;
+    ) as GenerateRules
     const generatedCandidates = new Set(
       generatedRules.map(
         ([
@@ -184,40 +184,40 @@ export class DecorationV3 {
           },
         ]) => candidate,
       ),
-    );
+    )
 
-    const result: NumberRange[] = [];
-    let index = 0;
+    const result: NumberRange[] = []
+    let index = 0
     for (const value of extracted) {
-      const start = text.indexOf(value, index);
-      const end = start + value.length;
+      const start = text.indexOf(value, index)
+      const end = start + value.length
       if (
         generatedCandidates.has(value)
         && includedTextWithRange.some(
           ({ range }) => range.start <= start && range.end >= end,
         )
       )
-        result.push({ start, end });
-      index = end;
+        result.push({ start, end })
+      index = end
     }
-    return result;
+    return result
   }
 
   checkContext() {
     if (!this.tailwindLibPath) {
       this.logger.appendLine(
         `${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`,
-      );
-      return false;
+      )
+      return false
     }
 
     if (!this.tailwindContext) {
       this.logger.appendLine(
         `${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`,
-      );
-      return false;
+      )
+      return false
     }
 
-    return true;
+    return true
   }
 }
