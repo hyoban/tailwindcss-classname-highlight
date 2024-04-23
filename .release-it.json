@@ -1,13 +1,15 @@
 {
   "plugins": {
-    "release-it-pnpm": {}
+    "release-it-pnpm": {
+      "inFile": "CHANGELOG.md",
+      "publishCommand": "npx vsce publish --no-dependencies"
+    }
   },
   "git": {
     "commitMessage": "chore: release v${version}",
     "tagName": "v${version}"
   },
   "hooks": {
-    "before:init": ["pnpm run lint", "pnpm run typecheck", "pnpm run build"],
-    "before:release": "pnpm run publish"
+    "before:init": ["pnpm run lint", "pnpm run typecheck", "pnpm run build"]
   }
 }
