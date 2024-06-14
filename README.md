@@ -30,3 +30,7 @@ Yes, it does.
 Yes. It will detect all tailwind configurations in your workspace and use different configurations for different packages.
 
 Currently, it does not support tailwind V4.
+
+### limitation
+
+This extension can not detect valid className that doesn't generate any CSS. Like `group`, `prose`.
