@@ -15,14 +15,12 @@ export function useCustomJiti(_jiti: () => ReturnType<typeof jitiFactory>) {
 function lazyJiti() {
   return (
     jiti
-    // eslint-disable-next-line unicorn/prefer-module
+
     ?? (jiti = jitiFactory(__filename, {
       interopDefault: true,
-      transform: (opts) => {
-        return transform(opts.source, {
-          transforms: ['typescript', 'imports'],
-        })
-      },
+      transform: opts => transform(opts.source, {
+        transforms: ['typescript', 'imports'],
+      }),
     }))
   )
 }
@@ -30,7 +28,6 @@ function lazyJiti() {
 export function loadConfig(path: string) {
   const config = (function () {
     try {
-      // eslint-disable-next-line unicorn/prefer-module
       return path ? require(path) : {}
     }
     catch {

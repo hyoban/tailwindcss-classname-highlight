@@ -7,11 +7,9 @@ const REGEX_HAS_SPECIAL = new RegExp(REGEX_SPECIAL.source)
  * @param {string|RegExp|Array<string|RegExp>} source
  */
 function toSource(source) {
-  source = Array.isArray(source) ? source : [source]
-
-  source = source.map(item => (item instanceof RegExp ? item.source : item))
-
-  return source.join('')
+  return (Array.isArray(source) ? source : [source])
+    .map(item => (item instanceof RegExp ? item.source : item))
+    .join('')
 }
 
 /**
@@ -74,6 +72,6 @@ export function nestedBrackets(open, close, depth = 1) {
 
 export function escape(string) {
   return string && REGEX_HAS_SPECIAL.test(string)
-    ? string.replaceAll(REGEX_SPECIAL, '\\$&')
+    ? string.replaceAll(REGEX_SPECIAL, String.raw`\$&`)
     : string || ''
 }

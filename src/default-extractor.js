@@ -29,13 +29,14 @@ function* buildRegExps(separator) {
 
   let utility = regex.any([
     // Arbitrary properties (without square brackets)
-    /\[[^\s"':`]+:[^\s[\]]+]/,
+    /\[[^\s"':`]+:[^\s[\]]+\]/,
 
     // Arbitrary properties with balanced square brackets
     // This is a targeted fix to continue to allow theme()
     // with square brackets to work in arbitrary properties
     // while fixing a problem with the regex matching too much
-    /\[[^\s"':\]`]+:\S+?\[\S+]\S+?]/,
+    // eslint-disable-next-line regexp/no-super-linear-backtracking
+    /\[[^\s"':\]`]+:\S+?\[\S+\]\S+?\]/,
 
     // Utilities
     regex.pattern([
@@ -53,14 +54,14 @@ function* buildRegExps(separator) {
           regex.pattern([
             // Arbitrary values
             regex.any([
-              /-(?:\w+-)*\['\S+']/,
-              /-(?:\w+-)*\["\S+"]/,
-              /-(?:\w+-)*\[`\S+`]/,
-              /-(?:\w+-)*\[(?:[^\s[\]]+\[[^\s[\]]+])*[^\s:[\]]+]/,
+              /-(?:\w+-)*\['\S+'\]/,
+              /-(?:\w+-)*\["\S+"\]/,
+              /-(?:\w+-)*\[`\S+`\]/,
+              /-(?:\w+-)*\[(?:[^\s[\]]+\[[^\s[\]]+\])*[^\s:[\]]+\]/,
             ]),
 
             // Not immediately followed by an `{[(`
-            /(?![([{]])/,
+            /(?![([{]\])/,
 
             // optionally followed by an opacity modifier
             /(?:\/[^\s"$'<>\\`]*)?/,
@@ -69,14 +70,14 @@ function* buildRegExps(separator) {
           regex.pattern([
             // Arbitrary values
             regex.any([
-              /-(?:\w+-)*\['\S+']/,
-              /-(?:\w+-)*\["\S+"]/,
-              /-(?:\w+-)*\[`\S+`]/,
-              /-(?:\w+-)*\[(?:[^\s[\]]+\[[^\s[\]]+])*[^\s[\]]+]/,
+              /-(?:\w+-)*\['\S+'\]/,
+              /-(?:\w+-)*\["\S+"\]/,
+              /-(?:\w+-)*\[`\S+`\]/,
+              /-(?:\w+-)*\[(?:[^\s[\]]+\[[^\s[\]]+\])*[^\s[\]]+\]/,
             ]),
 
             // Not immediately followed by an `{[(`
-            /(?![([{]])/,
+            /(?![([{]\])/,
 
             // optionally followed by an opacity modifier
             /(?:\/[^\s"$'\\`]*)?/,
@@ -93,21 +94,21 @@ function* buildRegExps(separator) {
     // Without quotes
     regex.any([
       // This is here to provide special support for the `@` variant
-      regex.pattern([/@\[[^\s"'`]+](\/[^\s"'`]+)?/, separator]),
+      regex.pattern([/@\[[^\s"'`]+\](\/[^\s"'`]+)?/, separator]),
 
       // With variant modifier (e.g.: group-[..]/modifier)
-      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s"'`]+]\/\w+/, separator]),
+      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s"'`]+\]\/\w+/, separator]),
 
-      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s"'`]+]/, separator]),
+      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s"'`]+\]/, separator]),
       regex.pattern([/[^\s"'[\\`]+/, separator]),
     ]),
 
     // With quotes allowed
     regex.any([
       // With variant modifier (e.g.: group-[..]/modifier)
-      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s`]+]\/\w+/, separator]),
+      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s`]+\]\/\w+/, separator]),
 
-      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s`]+]/, separator]),
+      regex.pattern([/([^\s"'[\\`]+-)?\[[^\s`]+\]/, separator]),
       regex.pattern([/[^\s[\\`]+/, separator]),
     ]),
   ]
@@ -117,7 +118,7 @@ function* buildRegExps(separator) {
       // Variants
       '((?=((',
       variantPattern,
-      ')+))\\2)?',
+      String.raw`)+))\2)?`,
 
       // Important (optional)
       /!?/,

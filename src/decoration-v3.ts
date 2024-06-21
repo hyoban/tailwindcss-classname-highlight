@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
-/* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'node:path'
 
@@ -22,16 +19,16 @@ type GenerateRules = Array<
     {
       raws: {
         tailwind: {
-          candidate: string,
-        },
-      },
+          candidate: string
+        }
+      }
     },
   ]
 >
 
 interface NumberRange {
-  start: number,
-  end: number,
+  start: number
+  end: number
 }
 
 export class DecorationV3 {
@@ -165,8 +162,8 @@ export class DecorationV3 {
     )(
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
-      /(@apply)[^;]*?;/g.test(text)
-        ? text.replaceAll(/(@apply[^;]*?)(;)/g, '$1 ;')
+      /@apply[^;]*;/.test(text)
+        ? text.replaceAll(/(@apply[^;]*)(;)/g, '$1 ;')
         : text,
     ) as string[]
     const generatedRules = generateRules(
@@ -196,8 +193,9 @@ export class DecorationV3 {
         && includedTextWithRange.some(
           ({ range }) => range.start <= start && range.end >= end,
         )
-      )
+      ) {
         result.push({ start, end })
+      }
       index = end
     }
     return result

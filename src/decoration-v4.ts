@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable unicorn/prefer-module */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -16,8 +14,8 @@ import { defaultIdeMatchInclude } from './utils'
 const LIMITED_CACHE_SIZE = 50
 
 interface NumberRange {
-  start: number,
-  end: number,
+  start: number
+  end: number
 }
 
 export class DecorationV4 {
@@ -162,8 +160,8 @@ export class DecorationV4 {
     const extracted = defaultExtractor(':')(
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
-      /(@apply)[^;]*?;/g.test(text)
-        ? text.replaceAll(/(@apply[^;]*?)(;)/g, '$1 ;')
+      /@apply[^;]*;/.test(text)
+        ? text.replaceAll(/(@apply[^;]*)(;)/g, '$1 ;')
         : text,
     ) as string[]
 
@@ -184,8 +182,9 @@ export class DecorationV4 {
         && includedTextWithRange.some(
           ({ range }) => range.start <= start && range.end >= end,
         )
-      )
+      ) {
         result.push({ start, end })
+      }
       index = end
     }
     return result
