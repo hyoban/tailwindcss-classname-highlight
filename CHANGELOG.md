@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Improve option description &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(1de4a)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/1de4a78)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.0...main)
+
 ## 0.6.0
 
 ### &nbsp;&nbsp;&nbsp;Features
