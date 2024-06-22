@@ -133,6 +133,14 @@ export class DecorationV4 {
     )
   }
 
+  hover(
+    _document: vscode.TextDocument,
+    _position: vscode.Position,
+  ): undefined {
+    // TODO: implement hover
+    return
+  }
+
   private isFileIgnored(filePath: string) {
     if (path.extname(filePath) === '.css')
       return false

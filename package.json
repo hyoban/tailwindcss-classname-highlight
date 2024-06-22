@@ -37,7 +37,17 @@
         "command": "tailwindcss-classname-highlight.reload",
         "title": "Tailwind CSS ClassName Highlight: Reload"
       }
-    ]
+    ],
+    "hoverProvider": "true",
+    "configuration": {
+      "title": "Tailwind CSS ClassName Highlight",
+      "properties": {
+        "tailwindcss-classname-highlight.enableHoverProvider": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
   },
   "scripts": {
     "build": "tsup src/index.ts --external vscode",

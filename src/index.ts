@@ -7,10 +7,13 @@ import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
+import { GeneratedCSSHoverProvider } from './hover-provider'
 
 export async function activate(extContext: vscode.ExtensionContext) {
-  const workspacePath
-    = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? ''
+  const folder = vscode.workspace.workspaceFolders?.[0]
+  if (!folder)
+    return
+  const workspacePath = folder.uri.fsPath ?? ''
   if (!workspacePath)
     return
 
@@ -175,4 +178,19 @@ export async function activate(extContext: vscode.ExtensionContext) {
         i.decorate(openEditor)
     }),
   )
+
+  const enableHoverProvider = vscode.workspace.getConfiguration('tailwindcss-classname-highlight').get('enableHoverProvider') as boolean
+  if (enableHoverProvider) {
+    extContext.subscriptions.push(
+      ...decorationList.map(i =>
+        vscode.languages.registerHoverProvider(
+          {
+            scheme: 'file',
+            pattern: '**/*',
+          },
+          new GeneratedCSSHoverProvider(i),
+        ),
+      ),
+    )
+  }
 }
