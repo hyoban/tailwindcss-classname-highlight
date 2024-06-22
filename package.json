@@ -44,7 +44,9 @@
       "properties": {
         "tailwindcss-classname-highlight.enableHoverProvider": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "title": "Enable Hover Provider",
+          "description": "You may need to disable Hovers provided by Tailwind CSS IntelliSense."
         }
       }
     }
