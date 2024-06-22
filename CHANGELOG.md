@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Hover provider &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(a5bf2)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/a5bf2ba)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.5.1...main)
+
 ## 0.5.1
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
