@@ -28,7 +28,6 @@ export class DecorationV4 {
   constructor(
     private workspacePath: string,
     private logger: vscode.OutputChannel,
-    private decorationType: vscode.TextEditorDecorationType,
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
@@ -122,15 +121,12 @@ export class DecorationV4 {
       numberRange = this.extract(text)
     }
 
-    openEditor.setDecorations(
-      this.decorationType,
-      numberRange.map(
-        ({ start, end }) =>
-          new vscode.Range(
-            openEditor.document.positionAt(start),
-            openEditor.document.positionAt(end),
-          ),
-      ),
+    return numberRange.map(
+      ({ start, end }) =>
+        new vscode.Range(
+          openEditor.document.positionAt(start),
+          openEditor.document.positionAt(end),
+        ),
     )
   }
 
