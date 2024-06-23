@@ -3,12 +3,19 @@ import path from 'node:path'
 
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
-import { defineExtension, extensionContext, useDisposable, useOutputChannel } from 'reactive-vscode'
+import { defineConfigs, defineExtension, extensionContext, useDisposable, useOutputChannel } from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
+
+export const { enableHoverProvider } = defineConfigs(
+  'tailwindcss-classname-highlight',
+  {
+    enableHoverProvider: Boolean,
+  },
+)
 
 const { activate, deactivate } = defineExtension(async () => {
   const folder = vscode.workspace.workspaceFolders?.[0]
@@ -178,20 +185,17 @@ const { activate, deactivate } = defineExtension(async () => {
     }),
   )
 
-  const enableHoverProvider = vscode.workspace.getConfiguration('tailwindcss-classname-highlight').get('enableHoverProvider') as boolean
-  if (enableHoverProvider) {
-    decorationList.forEach((i) => {
-      useDisposable(
-        vscode.languages.registerHoverProvider(
-          {
-            scheme: 'file',
-            pattern: '**/*',
-          },
-          new GeneratedCSSHoverProvider(i),
-        ),
-      )
-    })
-  }
+  decorationList.forEach((i) => {
+    useDisposable(
+      vscode.languages.registerHoverProvider(
+        {
+          scheme: 'file',
+          pattern: '**/*',
+        },
+        new GeneratedCSSHoverProvider(i),
+      ),
+    )
+  })
 })
 
 export { activate, deactivate }
