@@ -20,6 +20,9 @@ importers:
       '@vscode/vsce':
         specifier: ^2.29.0
         version: 2.29.0
+      '@vue/reactivity':
+        specifier: ^3.4.30
+        version: 3.4.30
       eslint:
         specifier: ^9.5.0
         version: 9.5.0
@@ -41,6 +44,9 @@ importers:
       micromatch:
         specifier: ^4.0.7
         version: 4.0.7
+      reactive-vscode:
+        specifier: 0.2.0-beta.1
+        version: 0.2.0-beta.1(@types/vscode@1.84.0)
       sucrase:
         specifier: ^3.35.0
         version: 3.35.0
@@ -1092,6 +1098,12 @@ packages:
     resolution: {integrity: sha512-63+aEO8SpjE6qKiIh2Cqy/P9zC7+USElGwpEdkyPp89xIBDBr5IqeNS3zkD3mp3wZqbvHIpJsCCNu74WQirYCg==}
     engines: {node: '>= 16'}
     hasBin: true
+
+  '@vue/reactivity@3.4.30':
+    resolution: {integrity: sha512-bVJurnCe3LS0JII8PPoAA63Zd2MBzcKrEzwdQl92eHCcxtIbxD2fhNwJpa+KkM3Y/A4T5FUnmdhgKwOf6BfbcA==}
+
+  '@vue/shared@3.4.30':
+    resolution: {integrity: sha512-CLg+f8RQCHQnKvuHY9adMsMaQOcqclh6Z5V9TaoMgy0ut0tz848joZ7/CYFFyF/yZ5i2yaw7Fn498C+CNZVHIg==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -2592,6 +2604,11 @@ packages:
 
   react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+
+  reactive-vscode@0.2.0-beta.1:
+    resolution: {integrity: sha512-vIgEMX/8YReF5Llci0xffnfCAZCpCUPqachhANcSpNOeawC9t5PG80IhKV4BHm8oukG5xoLCrpWRS9g2PhmnvA==}
+    peerDependencies:
+      '@types/vscode': ^1.89.0
 
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
@@ -4273,6 +4290,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@vue/reactivity@3.4.30':
+    dependencies:
+      '@vue/shared': 3.4.30
+
+  '@vue/shared@3.4.30': {}
+
   acorn-jsx@5.3.2(acorn@8.11.3):
     dependencies:
       acorn: 8.11.3
@@ -5937,6 +5960,10 @@ snapshots:
     optional: true
 
   react-is@18.2.0: {}
+
+  reactive-vscode@0.2.0-beta.1(@types/vscode@1.84.0):
+    dependencies:
+      '@types/vscode': 1.84.0
 
   read-cache@1.0.0:
     dependencies:

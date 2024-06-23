@@ -4,7 +4,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import ignore, { Ignore } from 'ignore'
+import type { Ignore } from 'ignore'
+import ignore from 'ignore'
 import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 

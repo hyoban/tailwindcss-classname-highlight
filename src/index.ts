@@ -3,13 +3,14 @@ import path from 'node:path'
 
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
+import { defineExtension, extensionContext, useDisposable, useOutputChannel } from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
 
-export async function activate(extContext: vscode.ExtensionContext) {
+const { activate, deactivate } = defineExtension(async () => {
   const folder = vscode.workspace.workspaceFolders?.[0]
   if (!folder)
     return
@@ -17,13 +18,11 @@ export async function activate(extContext: vscode.ExtensionContext) {
   if (!workspacePath)
     return
 
-  const logger = vscode.window.createOutputChannel(
-    'Tailwind CSS ClassName Highlight',
-  )
+  const logger = useOutputChannel('Tailwind CSS ClassName Highlight')
   const decorationType = vscode.window.createTextEditorDecorationType({
     textDecoration: 'none; border-bottom: 1px dashed;',
   })
-  extContext.subscriptions.push(logger, decorationType)
+  extensionContext.value?.subscriptions.push(decorationType)
 
   // handle multiple tailwind v3 config files
   let tailwindV3ConfigPathList: string[] = fg
@@ -141,10 +140,10 @@ export async function activate(extContext: vscode.ExtensionContext) {
   for (const file of fileWatcherList) {
     const fileWatcher = vscode.workspace.createFileSystemWatcher(file)
     fileWatcher.onDidChange(onReload)
-    extContext.subscriptions.push(fileWatcher)
+    extensionContext.value?.subscriptions.push(fileWatcher)
   }
 
-  extContext.subscriptions.push(
+  extensionContext.value?.subscriptions.push(
     vscode.commands.registerCommand(
       'tailwindcss-classname-highlight.reload',
       onReload,
@@ -159,7 +158,7 @@ export async function activate(extContext: vscode.ExtensionContext) {
   }
 
   // on editor change
-  extContext.subscriptions.push(
+  extensionContext.value?.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (!editor)
         return
@@ -181,8 +180,8 @@ export async function activate(extContext: vscode.ExtensionContext) {
 
   const enableHoverProvider = vscode.workspace.getConfiguration('tailwindcss-classname-highlight').get('enableHoverProvider') as boolean
   if (enableHoverProvider) {
-    extContext.subscriptions.push(
-      ...decorationList.map(i =>
+    decorationList.forEach((i) => {
+      useDisposable(
         vscode.languages.registerHoverProvider(
           {
             scheme: 'file',
@@ -190,7 +189,9 @@ export async function activate(extContext: vscode.ExtensionContext) {
           },
           new GeneratedCSSHoverProvider(i),
         ),
-      ),
-    )
+      )
+    })
   }
-}
+})
+
+export { activate, deactivate }
