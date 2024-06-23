@@ -46,12 +46,33 @@ type GenerateRules = Array<
   ]
 >
 
+function rgbToHex(r: number, g: number, b: number) {
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+}
+
+function withHelperComment(value: string) {
+  // rgb(0 112 224 / var(--tw-text-opacity));
+  const match = value.match(/^rgb\((?<r>\d{1,3}) (?<g>\d{1,3}) (?<b>\d{1,3}) \/ var\(--tw-text-opacity\)\)$/)
+  if (match && match.groups && match.groups.r && match.groups.g && match.groups.b) {
+    // with hex color
+    // rgb(0 112 224 / var(--tw-text-opacity)) /* #0070e0 */
+
+    return `${value} /* ${rgbToHex(
+      Number.parseInt(match.groups.r),
+      Number.parseInt(match.groups.g),
+      Number.parseInt(match.groups.b),
+    )} */`
+  }
+
+  return value
+}
+
 function generateCSS(root: RootNode): string {
   return `${root.type === 'rule' ? root.selector : `@${root.name} ${root.params}`} {\n${
     root.nodes
       .map((node) => {
         if (node.type === 'decl') {
-          return `  ${node.prop}: ${node.value};`
+          return `  ${node.prop}: ${withHelperComment(node.value)};`
         }
         return generateCSS(node).split('\n').map(line => `  ${line}`).join('\n')
       })
