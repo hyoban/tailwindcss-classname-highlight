@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Add rgb to hex help comment &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(cbd7a)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/cbd7a77)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.1...main)
+
 ## 0.6.1
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
