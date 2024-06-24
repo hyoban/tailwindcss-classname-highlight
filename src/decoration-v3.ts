@@ -5,6 +5,7 @@ import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
 import { loadConfig } from './load-config'
+import { logger } from './state'
 import { defaultIdeMatchInclude, hash } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
@@ -92,9 +93,6 @@ export class DecorationV3 {
   resultCache: Array<[string, Result[]]> = []
 
   constructor(
-    private workspacePath: string,
-    private logger: vscode.OutputChannel,
-    private decorationType: vscode.TextEditorDecorationType,
     private tailwindLibPath: string,
     private tailwindConfigPath: string,
   ) {
@@ -103,14 +101,14 @@ export class DecorationV3 {
     }
     catch (error) {
       if (error instanceof Error) {
-        this.logger.appendLine(`Error updating Tailwind CSS context: ${error.message}`)
+        logger.appendLine(`Error updating Tailwind CSS context: ${error.message}`)
       }
     }
   }
 
   updateTailwindContext() {
     const now = Date.now()
-    this.logger.appendLine('Updating Tailwind CSS context')
+    logger.appendLine('Updating Tailwind CSS context')
 
     delete require.cache[require.resolve(this.tailwindConfigPath)]
     const { createContext } = require(
@@ -122,7 +120,7 @@ export class DecorationV3 {
     )
     this.resultCache = []
 
-    this.logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
+    logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
   decorate(openEditor?: vscode.TextEditor | null | undefined) {
@@ -149,15 +147,12 @@ export class DecorationV3 {
       numberRange = this.extract(text)
     }
 
-    openEditor.setDecorations(
-      this.decorationType,
-      numberRange.map(
-        ({ start, end }) =>
-          new vscode.Range(
-            openEditor.document.positionAt(start),
-            openEditor.document.positionAt(end),
-          ),
-      ),
+    return numberRange.map(
+      ({ start, end }) =>
+        new vscode.Range(
+          openEditor.document.positionAt(start),
+          openEditor.document.positionAt(end),
+        ),
     )
   }
 
@@ -250,12 +245,12 @@ export class DecorationV3 {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
+      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS library path not found`)
       return false
     }
 
     if (!this.tailwindContext) {
-      this.logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
+      logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
       return false
     }
 

@@ -3,60 +3,67 @@ import path from 'node:path'
 
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
+import type { Ref } from 'reactive-vscode'
+import {
+  defineExtension,
+  ref,
+  useActiveTextEditor,
+  useCommand,
+  useDisposable,
+  useEditorDecorations,
+  useFsWatcher,
+  watchEffect,
+} from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
+import { logger, useWorkspaceFsPath } from './state'
 
-export async function activate(extContext: vscode.ExtensionContext) {
-  const folder = vscode.workspace.workspaceFolders?.[0]
-  if (!folder)
+const { activate, deactivate } = defineExtension(async () => {
+  const workspaceFsPath = useWorkspaceFsPath()
+  if (!workspaceFsPath.value)
     return
-  const workspacePath = folder.uri.fsPath ?? ''
-  if (!workspacePath)
-    return
-
-  const logger = vscode.window.createOutputChannel(
-    'Tailwind CSS ClassName Highlight',
-  )
-  const decorationType = vscode.window.createTextEditorDecorationType({
-    textDecoration: 'none; border-bottom: 1px dashed;',
-  })
-  extContext.subscriptions.push(logger, decorationType)
 
   // handle multiple tailwind v3 config files
-  let tailwindV3ConfigPathList: string[] = fg
-    .globSync('./**/tailwind.config.{js,cjs,mjs,ts}', {
-      cwd: workspacePath,
+  let tailwindV3ConfigPaths = (
+    await fg.glob('./**/tailwind.config.{js,cjs,mjs,ts}', {
+      cwd: workspaceFsPath.value,
       ignore: ['**/node_modules/**'],
     })
-    .map(p => path.join(workspacePath, p))
-  let tailwindV3PackageEntryList: string[] = tailwindV3ConfigPathList.map(p =>
+  ).map(p => path.join(workspaceFsPath.value, p))
+
+  let tailwindV3PackageEntries = tailwindV3ConfigPaths.map(p =>
     resolveModule('tailwindcss', { paths: [p] }),
   ) as string[]
-  if (tailwindV3PackageEntryList.length > 0) {
-    tailwindV3ConfigPathList = tailwindV3ConfigPathList.filter(
-      (_, index) => tailwindV3PackageEntryList[index],
+  if (tailwindV3PackageEntries.length > 0) {
+    tailwindV3ConfigPaths = tailwindV3ConfigPaths.filter(
+      (_, index) => tailwindV3PackageEntries[index],
     )
-    tailwindV3PackageEntryList = tailwindV3PackageEntryList.filter(Boolean)
+    tailwindV3PackageEntries = tailwindV3PackageEntries.filter(Boolean)
   }
 
-  const workspaceTailwindPackageInfo = await getPackageInfo('tailwindcss', {
-    paths: [workspacePath],
-  })
+  const workspaceTailwindPackageInfo = await getPackageInfo(
+    'tailwindcss',
+    {
+      paths: [workspaceFsPath.value],
+    },
+  )
   if (
     (!workspaceTailwindPackageInfo?.version
     || !workspaceTailwindPackageInfo?.rootPath)
-    && tailwindV3ConfigPathList.length === 0
+    && tailwindV3ConfigPaths.length === 0
   ) {
     logger.appendLine('Tailwind CSS package not found')
     return
   }
 
-  if (tailwindV3ConfigPathList.length > 1) {
+  if (tailwindV3ConfigPaths.length > 1) {
     logger.appendLine(
-      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPathList.map(p => p).join(', ')}`,
+      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPaths
+        .map(p => p)
+        .join(', ')}`,
     )
   }
   else {
@@ -66,24 +73,27 @@ export async function activate(extContext: vscode.ExtensionContext) {
   }
 
   const isV4 = workspaceTailwindPackageInfo?.version?.startsWith('4') ?? false
-  const globalTailwindPackageEntry = resolveModule('tailwindcss', {
-    paths: [workspacePath],
-  })!
-  if (isV4 && !globalTailwindPackageEntry) {
+  const workspaceTailwindPackageEntry = resolveModule(
+    'tailwindcss',
+    {
+      paths: [workspaceFsPath.value],
+    },
+  )!
+  if (isV4 && !workspaceTailwindPackageEntry) {
     logger.appendLine('Tailwind CSS package entry not found')
     return
   }
 
-  const tailwindConfigPath: string[] = tailwindV3ConfigPathList
+  const tailwindConfigPath = tailwindV3ConfigPaths
   let cssFilePath = ''
 
   if (isV4) {
     const configPath = fg
       .globSync('./**/*.css', {
-        cwd: workspacePath,
+        cwd: workspaceFsPath.value,
         ignore: ['**/node_modules/**'],
       })
-      .map(p => path.join(workspacePath, p))
+      .map(p => path.join(workspaceFsPath.value, p))
       .filter(p => fs.existsSync(p))
       .filter((p) => {
         const content = fs.readFileSync(p, 'utf8')
@@ -106,19 +116,13 @@ export async function activate(extContext: vscode.ExtensionContext) {
   const decorationList = isV4
     ? [
         new DecorationV4(
-          workspacePath,
-          logger,
-          decorationType,
-          globalTailwindPackageEntry.replaceAll('.mjs', '.js'),
+          workspaceTailwindPackageEntry.replaceAll('.mjs', '.js'),
           cssFilePath,
         ),
       ]
-    : tailwindV3PackageEntryList.map(
+    : tailwindV3PackageEntries.map(
       (tailwindcssPackageEntry, index) =>
         new DecorationV3(
-          workspacePath,
-          logger,
-          decorationType,
           path.resolve(tailwindcssPackageEntry, '../../'),
           tailwindConfigPath.at(index)!,
         ),
@@ -127,70 +131,51 @@ export async function activate(extContext: vscode.ExtensionContext) {
   if (!decorationList.some(i => i.checkContext()))
     return
 
+  const editor = useActiveTextEditor()
+  const decorationRange: Ref<vscode.Range[]> = ref([])
+  useEditorDecorations(
+    editor,
+    { textDecoration: 'none; border-bottom: 1px dashed;' },
+    decorationRange,
+  )
+
+  const decorateAll = () => {
+    for (const i of decorationList) {
+      const ranges = i.decorate(editor.value)
+      if (ranges)
+        decorationRange.value = ranges
+    }
+  }
+  watchEffect(() => {
+    decorateAll()
+  })
+
   const onReload = () => {
     for (const i of decorationList)
       i.updateTailwindContext()
 
-    for (const element of vscode.window.visibleTextEditors) {
-      for (const i of decorationList)
-        i.decorate(element)
-    }
+    decorateAll()
   }
 
   const fileWatcherList = [...tailwindConfigPath, cssFilePath].filter(Boolean)
   for (const file of fileWatcherList) {
-    const fileWatcher = vscode.workspace.createFileSystemWatcher(file)
+    const fileWatcher = useFsWatcher(file)
     fileWatcher.onDidChange(onReload)
-    extContext.subscriptions.push(fileWatcher)
   }
 
-  extContext.subscriptions.push(
-    vscode.commands.registerCommand(
-      'tailwindcss-classname-highlight.reload',
-      onReload,
-    ),
-  )
+  useCommand('tailwindcss-classname-highlight.reload', onReload)
 
-  // on activation
-  const openEditors = vscode.window.visibleTextEditors
-  for (const element of openEditors) {
-    for (const i of decorationList)
-      i.decorate(element)
-  }
-
-  // on editor change
-  extContext.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (!editor)
-        return
-      for (const i of decorationList)
-        i.decorate(editor)
-    }),
-    vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.languageId === 'Log')
-        return
-      const openEditor = vscode.window.visibleTextEditors.find(
-        editor => editor.document.uri === event.document.uri,
-      )
-      if (!openEditor)
-        return
-      for (const i of decorationList)
-        i.decorate(openEditor)
-    }),
-  )
-
-  const enableHoverProvider = vscode.workspace.getConfiguration('tailwindcss-classname-highlight').get('enableHoverProvider') as boolean
-  if (enableHoverProvider) {
-    extContext.subscriptions.push(
-      ...decorationList.map(i =>
-        vscode.languages.registerHoverProvider(
-          {
-            scheme: 'file',
-            pattern: '**/*',
-          },
-          new GeneratedCSSHoverProvider(i),
-        ),
+  decorationList.forEach((i) => {
+    useDisposable(
+      vscode.languages.registerHoverProvider(
+        {
+          scheme: 'file',
+          pattern: '**/*',
+        },
+        new GeneratedCSSHoverProvider(i),
       ),
     )
-  }
-}
+  })
+})
+
+export { activate, deactivate }

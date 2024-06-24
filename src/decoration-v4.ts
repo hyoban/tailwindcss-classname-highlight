@@ -4,11 +4,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import ignore, { Ignore } from 'ignore'
+import type { Ignore } from 'ignore'
+import ignore from 'ignore'
 import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
+import { logger, useWorkspaceFsPath } from './state'
 import { defaultIdeMatchInclude } from './utils'
 
 const LIMITED_CACHE_SIZE = 50
@@ -25,9 +27,6 @@ export class DecorationV4 {
   ig: Ignore | undefined
 
   constructor(
-    private workspacePath: string,
-    private logger: vscode.OutputChannel,
-    private decorationType: vscode.TextEditorDecorationType,
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
@@ -36,7 +35,7 @@ export class DecorationV4 {
     }
     catch (error) {
       if (error instanceof Error) {
-        this.logger.appendLine(
+        logger.appendLine(
           `Error updating Tailwind CSS context${error.message}`,
         )
       }
@@ -45,29 +44,30 @@ export class DecorationV4 {
 
   updateTailwindContext() {
     const now = Date.now()
-    this.logger.appendLine('Updating Tailwind CSS context')
+    logger.appendLine('Updating Tailwind CSS context')
 
     const { __unstable__loadDesignSystem } = require(this.tailwindLibPath)
+    const workspaceFsPath = useWorkspaceFsPath()
     const presetThemePath = resolveModule('tailwindcss/theme.css', {
-      paths: [this.workspacePath],
+      paths: [workspaceFsPath.value],
     })
     if (!presetThemePath) {
-      this.logger.appendLine('Preset theme not found')
+      logger.appendLine('Preset theme not found')
       return
     }
 
-    this.logger.appendLine(
+    logger.appendLine(
       `Loading css from ${presetThemePath} and ${this.cssPath}`,
     )
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
     this.textContentHashCache = []
 
-    this.logger.appendLine(
+    logger.appendLine(
       `Tailwind CSS context updated in ${Date.now() - now}ms`,
     )
 
-    const gitignorePath = path.join(this.workspacePath, '.gitignore')
+    const gitignorePath = path.join(workspaceFsPath.value, '.gitignore')
     if (!fs.existsSync(gitignorePath))
       return
     const gitignore = fs
@@ -121,15 +121,12 @@ export class DecorationV4 {
       numberRange = this.extract(text)
     }
 
-    openEditor.setDecorations(
-      this.decorationType,
-      numberRange.map(
-        ({ start, end }) =>
-          new vscode.Range(
-            openEditor.document.positionAt(start),
-            openEditor.document.positionAt(end),
-          ),
-      ),
+    return numberRange.map(
+      ({ start, end }) =>
+        new vscode.Range(
+          openEditor.document.positionAt(start),
+          openEditor.document.positionAt(end),
+        ),
     )
   }
 
@@ -148,7 +145,9 @@ export class DecorationV4 {
     if (!path.isAbsolute(filePath))
       return true
 
-    const relativeFilePath = path.relative(this.workspacePath, filePath)
+    const workspaceFsPath = useWorkspaceFsPath()
+
+    const relativeFilePath = path.relative(workspaceFsPath.value, filePath)
     return this.ig?.ignores(relativeFilePath) ?? false
   }
 
@@ -200,14 +199,14 @@ export class DecorationV4 {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      this.logger.appendLine(
+      logger.appendLine(
         'Tailwind lib path not found, this extension will not work',
       )
       return false
     }
 
     if (!this.tailwindContext) {
-      this.logger.appendLine(
+      logger.appendLine(
         'Tailwind context not found, this extension will not work',
       )
       return false
