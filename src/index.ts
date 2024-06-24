@@ -27,37 +27,43 @@ const { activate, deactivate } = defineExtension(async () => {
     return
 
   // handle multiple tailwind v3 config files
-  let tailwindV3ConfigPathList: string[] = fg
-    .globSync('./**/tailwind.config.{js,cjs,mjs,ts}', {
+  let tailwindV3ConfigPaths = (
+    await fg.glob('./**/tailwind.config.{js,cjs,mjs,ts}', {
       cwd: workspaceFsPath.value,
       ignore: ['**/node_modules/**'],
     })
-    .map(p => path.join(workspaceFsPath.value, p))
-  let tailwindV3PackageEntryList: string[] = tailwindV3ConfigPathList.map(p =>
+  ).map(p => path.join(workspaceFsPath.value, p))
+
+  let tailwindV3PackageEntries = tailwindV3ConfigPaths.map(p =>
     resolveModule('tailwindcss', { paths: [p] }),
   ) as string[]
-  if (tailwindV3PackageEntryList.length > 0) {
-    tailwindV3ConfigPathList = tailwindV3ConfigPathList.filter(
-      (_, index) => tailwindV3PackageEntryList[index],
+  if (tailwindV3PackageEntries.length > 0) {
+    tailwindV3ConfigPaths = tailwindV3ConfigPaths.filter(
+      (_, index) => tailwindV3PackageEntries[index],
     )
-    tailwindV3PackageEntryList = tailwindV3PackageEntryList.filter(Boolean)
+    tailwindV3PackageEntries = tailwindV3PackageEntries.filter(Boolean)
   }
 
-  const workspaceTailwindPackageInfo = await getPackageInfo('tailwindcss', {
-    paths: [workspaceFsPath.value],
-  })
+  const workspaceTailwindPackageInfo = await getPackageInfo(
+    'tailwindcss',
+    {
+      paths: [workspaceFsPath.value],
+    },
+  )
   if (
     (!workspaceTailwindPackageInfo?.version
     || !workspaceTailwindPackageInfo?.rootPath)
-    && tailwindV3ConfigPathList.length === 0
+    && tailwindV3ConfigPaths.length === 0
   ) {
     logger.appendLine('Tailwind CSS package not found')
     return
   }
 
-  if (tailwindV3ConfigPathList.length > 1) {
+  if (tailwindV3ConfigPaths.length > 1) {
     logger.appendLine(
-      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPathList.map(p => p).join(', ')}`,
+      `Multiple Tailwind CSS config files found: ${tailwindV3ConfigPaths
+        .map(p => p)
+        .join(', ')}`,
     )
   }
   else {
@@ -67,15 +73,18 @@ const { activate, deactivate } = defineExtension(async () => {
   }
 
   const isV4 = workspaceTailwindPackageInfo?.version?.startsWith('4') ?? false
-  const globalTailwindPackageEntry = resolveModule('tailwindcss', {
-    paths: [workspaceFsPath.value],
-  })!
-  if (isV4 && !globalTailwindPackageEntry) {
+  const workspaceTailwindPackageEntry = resolveModule(
+    'tailwindcss',
+    {
+      paths: [workspaceFsPath.value],
+    },
+  )!
+  if (isV4 && !workspaceTailwindPackageEntry) {
     logger.appendLine('Tailwind CSS package entry not found')
     return
   }
 
-  const tailwindConfigPath: string[] = tailwindV3ConfigPathList
+  const tailwindConfigPath = tailwindV3ConfigPaths
   let cssFilePath = ''
 
   if (isV4) {
@@ -107,11 +116,11 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationList = isV4
     ? [
         new DecorationV4(
-          globalTailwindPackageEntry.replaceAll('.mjs', '.js'),
+          workspaceTailwindPackageEntry.replaceAll('.mjs', '.js'),
           cssFilePath,
         ),
       ]
-    : tailwindV3PackageEntryList.map(
+    : tailwindV3PackageEntries.map(
       (tailwindcssPackageEntry, index) =>
         new DecorationV3(
           path.resolve(tailwindcssPackageEntry, '../../'),
