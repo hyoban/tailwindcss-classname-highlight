@@ -4,19 +4,12 @@ import path from 'node:path'
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import type { Ref } from 'reactive-vscode'
-import { computed, defineConfigs, defineExtension, ref, useActiveTextEditor, useCommand, useDisposable, useEditorDecorations, useFsWatcher, useOutputChannel, useWorkspaceFolders, watchEffect } from 'reactive-vscode'
+import { computed, defineExtension, ref, useActiveTextEditor, useCommand, useDisposable, useEditorDecorations, useFsWatcher, useOutputChannel, useWorkspaceFolders, watchEffect } from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
-
-export const { enableHoverProvider } = defineConfigs(
-  'tailwindcss-classname-highlight',
-  {
-    enableHoverProvider: Boolean,
-  },
-)
 
 const { activate, deactivate } = defineExtension(async () => {
   const folders = useWorkspaceFolders()

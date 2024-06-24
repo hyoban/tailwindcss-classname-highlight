@@ -1,6 +1,6 @@
 import type * as vscode from 'vscode'
 
-import { enableHoverProvider } from '.'
+import { enableHoverProvider } from './config'
 import type { DecorationV3 } from './decoration-v3'
 import type { DecorationV4 } from './decoration-v4'
 
