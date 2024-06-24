@@ -4,20 +4,19 @@ import path from 'node:path'
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import type { Ref } from 'reactive-vscode'
-import { computed, defineExtension, ref, useActiveTextEditor, useCommand, useDisposable, useEditorDecorations, useFsWatcher, useOutputChannel, useWorkspaceFolders, watchEffect } from 'reactive-vscode'
+import { computed, defineExtension, ref, useActiveTextEditor, useCommand, useDisposable, useEditorDecorations, useFsWatcher, useWorkspaceFolders, watchEffect } from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
+import { logger } from './utils'
 
 const { activate, deactivate } = defineExtension(async () => {
   const folders = useWorkspaceFolders()
   const workspacePath = computed(() => folders.value?.[0]?.uri.fsPath ?? '')
   if (!workspacePath.value)
     return
-
-  const logger = useOutputChannel('Tailwind CSS ClassName Highlight')
 
   // handle multiple tailwind v3 config files
   let tailwindV3ConfigPathList: string[] = fg
@@ -101,7 +100,6 @@ const { activate, deactivate } = defineExtension(async () => {
     ? [
         new DecorationV4(
           workspacePath.value,
-          logger,
           globalTailwindPackageEntry.replaceAll('.mjs', '.js'),
           cssFilePath,
         ),
@@ -110,7 +108,6 @@ const { activate, deactivate } = defineExtension(async () => {
       (tailwindcssPackageEntry, index) =>
         new DecorationV3(
           workspacePath.value,
-          logger,
           path.resolve(tailwindcssPackageEntry, '../../'),
           tailwindConfigPath.at(index)!,
         ),

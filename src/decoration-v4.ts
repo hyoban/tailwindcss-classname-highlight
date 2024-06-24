@@ -10,7 +10,7 @@ import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
-import { defaultIdeMatchInclude } from './utils'
+import { defaultIdeMatchInclude, logger } from './utils'
 
 const LIMITED_CACHE_SIZE = 50
 
@@ -27,7 +27,6 @@ export class DecorationV4 {
 
   constructor(
     private workspacePath: string,
-    private logger: vscode.OutputChannel,
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
@@ -36,7 +35,7 @@ export class DecorationV4 {
     }
     catch (error) {
       if (error instanceof Error) {
-        this.logger.appendLine(
+        logger.appendLine(
           `Error updating Tailwind CSS context${error.message}`,
         )
       }
@@ -45,25 +44,25 @@ export class DecorationV4 {
 
   updateTailwindContext() {
     const now = Date.now()
-    this.logger.appendLine('Updating Tailwind CSS context')
+    logger.appendLine('Updating Tailwind CSS context')
 
     const { __unstable__loadDesignSystem } = require(this.tailwindLibPath)
     const presetThemePath = resolveModule('tailwindcss/theme.css', {
       paths: [this.workspacePath],
     })
     if (!presetThemePath) {
-      this.logger.appendLine('Preset theme not found')
+      logger.appendLine('Preset theme not found')
       return
     }
 
-    this.logger.appendLine(
+    logger.appendLine(
       `Loading css from ${presetThemePath} and ${this.cssPath}`,
     )
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
     this.textContentHashCache = []
 
-    this.logger.appendLine(
+    logger.appendLine(
       `Tailwind CSS context updated in ${Date.now() - now}ms`,
     )
 
@@ -197,14 +196,14 @@ export class DecorationV4 {
 
   checkContext() {
     if (!this.tailwindLibPath) {
-      this.logger.appendLine(
+      logger.appendLine(
         'Tailwind lib path not found, this extension will not work',
       )
       return false
     }
 
     if (!this.tailwindContext) {
-      this.logger.appendLine(
+      logger.appendLine(
         'Tailwind context not found, this extension will not work',
       )
       return false
