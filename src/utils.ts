@@ -1,5 +1,3 @@
-import { defineConfigs, defineLogger } from 'reactive-vscode'
-
 export const defaultIdeMatchInclude = [
   // String literals
   // eslint-disable-next-line no-control-regex
@@ -22,12 +20,3 @@ export function hash(str: string): string | null {
     ? crypto.createHash('md5').update(str).digest('hex')
     : null
 }
-
-export const { enableHoverProvider } = defineConfigs(
-  'tailwindcss-classname-highlight',
-  {
-    enableHoverProvider: Boolean,
-  },
-)
-
-export const logger = defineLogger('Tailwind CSS ClassName Highlight')

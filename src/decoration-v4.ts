@@ -10,7 +10,8 @@ import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
-import { defaultIdeMatchInclude, logger } from './utils'
+import { logger, useWorkspaceFsPath } from './state'
+import { defaultIdeMatchInclude } from './utils'
 
 const LIMITED_CACHE_SIZE = 50
 
@@ -26,7 +27,6 @@ export class DecorationV4 {
   ig: Ignore | undefined
 
   constructor(
-    private workspacePath: string,
     private tailwindLibPath: string,
     private cssPath: string,
   ) {
@@ -47,8 +47,9 @@ export class DecorationV4 {
     logger.appendLine('Updating Tailwind CSS context')
 
     const { __unstable__loadDesignSystem } = require(this.tailwindLibPath)
+    const workspaceFsPath = useWorkspaceFsPath()
     const presetThemePath = resolveModule('tailwindcss/theme.css', {
-      paths: [this.workspacePath],
+      paths: [workspaceFsPath.value],
     })
     if (!presetThemePath) {
       logger.appendLine('Preset theme not found')
@@ -66,7 +67,7 @@ export class DecorationV4 {
       `Tailwind CSS context updated in ${Date.now() - now}ms`,
     )
 
-    const gitignorePath = path.join(this.workspacePath, '.gitignore')
+    const gitignorePath = path.join(workspaceFsPath.value, '.gitignore')
     if (!fs.existsSync(gitignorePath))
       return
     const gitignore = fs
@@ -144,7 +145,9 @@ export class DecorationV4 {
     if (!path.isAbsolute(filePath))
       return true
 
-    const relativeFilePath = path.relative(this.workspacePath, filePath)
+    const workspaceFsPath = useWorkspaceFsPath()
+
+    const relativeFilePath = path.relative(workspaceFsPath.value, filePath)
     return this.ig?.ignores(relativeFilePath) ?? false
   }
 

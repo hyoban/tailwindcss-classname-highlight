@@ -4,27 +4,35 @@ import path from 'node:path'
 import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import type { Ref } from 'reactive-vscode'
-import { computed, defineExtension, ref, useActiveTextEditor, useCommand, useDisposable, useEditorDecorations, useFsWatcher, useWorkspaceFolders, watchEffect } from 'reactive-vscode'
+import {
+  defineExtension,
+  ref,
+  useActiveTextEditor,
+  useCommand,
+  useDisposable,
+  useEditorDecorations,
+  useFsWatcher,
+  watchEffect,
+} from 'reactive-vscode'
 import * as vscode from 'vscode'
 
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
-import { logger } from './utils'
+import { logger, useWorkspaceFsPath } from './state'
 
 const { activate, deactivate } = defineExtension(async () => {
-  const folders = useWorkspaceFolders()
-  const workspacePath = computed(() => folders.value?.[0]?.uri.fsPath ?? '')
-  if (!workspacePath.value)
+  const workspaceFsPath = useWorkspaceFsPath()
+  if (!workspaceFsPath.value)
     return
 
   // handle multiple tailwind v3 config files
   let tailwindV3ConfigPathList: string[] = fg
     .globSync('./**/tailwind.config.{js,cjs,mjs,ts}', {
-      cwd: workspacePath.value,
+      cwd: workspaceFsPath.value,
       ignore: ['**/node_modules/**'],
     })
-    .map(p => path.join(workspacePath.value, p))
+    .map(p => path.join(workspaceFsPath.value, p))
   let tailwindV3PackageEntryList: string[] = tailwindV3ConfigPathList.map(p =>
     resolveModule('tailwindcss', { paths: [p] }),
   ) as string[]
@@ -36,7 +44,7 @@ const { activate, deactivate } = defineExtension(async () => {
   }
 
   const workspaceTailwindPackageInfo = await getPackageInfo('tailwindcss', {
-    paths: [workspacePath.value],
+    paths: [workspaceFsPath.value],
   })
   if (
     (!workspaceTailwindPackageInfo?.version
@@ -60,7 +68,7 @@ const { activate, deactivate } = defineExtension(async () => {
 
   const isV4 = workspaceTailwindPackageInfo?.version?.startsWith('4') ?? false
   const globalTailwindPackageEntry = resolveModule('tailwindcss', {
-    paths: [workspacePath.value],
+    paths: [workspaceFsPath.value],
   })!
   if (isV4 && !globalTailwindPackageEntry) {
     logger.appendLine('Tailwind CSS package entry not found')
@@ -73,10 +81,10 @@ const { activate, deactivate } = defineExtension(async () => {
   if (isV4) {
     const configPath = fg
       .globSync('./**/*.css', {
-        cwd: workspacePath.value,
+        cwd: workspaceFsPath.value,
         ignore: ['**/node_modules/**'],
       })
-      .map(p => path.join(workspacePath.value, p))
+      .map(p => path.join(workspaceFsPath.value, p))
       .filter(p => fs.existsSync(p))
       .filter((p) => {
         const content = fs.readFileSync(p, 'utf8')
@@ -99,7 +107,6 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationList = isV4
     ? [
         new DecorationV4(
-          workspacePath.value,
           globalTailwindPackageEntry.replaceAll('.mjs', '.js'),
           cssFilePath,
         ),
@@ -107,7 +114,6 @@ const { activate, deactivate } = defineExtension(async () => {
     : tailwindV3PackageEntryList.map(
       (tailwindcssPackageEntry, index) =>
         new DecorationV3(
-          workspacePath.value,
           path.resolve(tailwindcssPackageEntry, '../../'),
           tailwindConfigPath.at(index)!,
         ),

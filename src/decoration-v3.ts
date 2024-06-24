@@ -5,7 +5,8 @@ import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
 import { loadConfig } from './load-config'
-import { defaultIdeMatchInclude, hash, logger } from './utils'
+import { logger } from './state'
+import { defaultIdeMatchInclude, hash } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
 const LIMITED_CACHE_SIZE = 50
@@ -92,7 +93,6 @@ export class DecorationV3 {
   resultCache: Array<[string, Result[]]> = []
 
   constructor(
-    private workspacePath: string,
     private tailwindLibPath: string,
     private tailwindConfigPath: string,
   ) {
