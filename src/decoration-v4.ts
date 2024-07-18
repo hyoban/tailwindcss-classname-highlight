@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import fs from 'node:fs'
 import path from 'node:path'
