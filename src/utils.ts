@@ -7,7 +7,6 @@ export const defaultIdeMatchInclude = [
 ]
 
 export function hash(str: string): string | null {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   let crypto: typeof import('node:crypto') | undefined
   try {
     crypto = require('node:crypto')
