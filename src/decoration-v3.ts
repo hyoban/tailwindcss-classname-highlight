@@ -90,7 +90,7 @@ interface Result {
 export class DecorationV3 {
   tailwindContext: any
 
-  resultCache: Array<[string, Result[]]> = []
+  resultCache = new Map<string, Result[]>()
 
   constructor(
     private tailwindLibPath: string,
@@ -118,7 +118,7 @@ export class DecorationV3 {
     this.tailwindContext = createContext(
       resolveConfig(loadConfig(this.tailwindConfigPath)),
     )
-    this.resultCache = []
+    this.resultCache.clear()
 
     logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
@@ -133,14 +133,16 @@ export class DecorationV3 {
     let numberRange: Result[] = []
 
     if (textHash) {
-      const cached = this.resultCache.find(([hash]) => hash === textHash)
+      const cached = this.resultCache.get(textHash)
       if (cached) {
-        numberRange = cached[1]
+        numberRange = cached
       }
       else {
         numberRange = this.extract(text)
-        this.resultCache.unshift([textHash, numberRange])
-        this.resultCache.length = Math.min(this.resultCache.length, LIMITED_CACHE_SIZE)
+        this.resultCache.set(textHash, numberRange)
+        if (this.resultCache.size > LIMITED_CACHE_SIZE) {
+          this.resultCache.delete(this.resultCache.keys().next().value)
+        }
       }
     }
     else {
@@ -162,11 +164,11 @@ export class DecorationV3 {
   ) {
     const text = document.getText()
     const textHash = hash(text)
-    const cache = this.resultCache.find(([hash]) => hash === textHash)
+    const cache = this.resultCache.get(textHash!)
     if (!cache)
       return
 
-    const cachedResult = cache[1].find(
+    const cachedResult = cache.find(
       ({ start, end }) =>
         start <= document.offsetAt(position)
         && end >= document.offsetAt(position),
@@ -222,12 +224,21 @@ export class DecorationV3 {
       this.tailwindContext,
     ) as GenerateRules
 
+    const generatedRuleMap = new Map<string, GenerateRules>()
+    for (const rule of generatedRules) {
+      const key = rule[1].raws.tailwind.candidate
+      if (!generatedRuleMap.has(key)) {
+        generatedRuleMap.set(key, [])
+      }
+      generatedRuleMap.get(key)!.push(rule)
+    }
+
     const result: Result[] = []
     let index = 0
     for (const value of extracted) {
       const start = text.indexOf(value, index)
       const end = start + value.length
-      const generatedRule = generatedRules.find(i => i[1].raws.tailwind.candidate === value)
+      const generatedRule = generatedRuleMap.get(value)?.[0]
       if (
         generatedRule
         && includedTextWithRange.some(({ range }) => range.start <= start && range.end >= end)
