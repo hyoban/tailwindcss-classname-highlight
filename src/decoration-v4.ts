@@ -21,7 +21,7 @@ interface NumberRange {
 
 export class DecorationV4 {
   tailwindContext: any
-  textContentHashCache: Array<[string, NumberRange[]]> = []
+  textContentHashCache = new Map<string, NumberRange[]>()
 
   ig: Ignore | undefined
 
@@ -60,7 +60,7 @@ export class DecorationV4 {
     )
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
     this.tailwindContext = __unstable__loadDesignSystem(css)
-    this.textContentHashCache = []
+    this.textContentHashCache.clear()
 
     logger.appendLine(
       `Tailwind CSS context updated in ${Date.now() - now}ms`,
@@ -98,22 +98,18 @@ export class DecorationV4 {
     let numberRange: NumberRange[] = []
 
     if (crypto) {
-      const cached = this.textContentHashCache.find(
-        ([hash]) => hash === currentTextContentHash,
-      )
+      const cached = this.textContentHashCache.get(currentTextContentHash)
       if (cached) {
-        numberRange = cached[1]
+        numberRange = cached
       }
       else {
         numberRange = this.extract(text)
-        this.textContentHashCache.unshift([
-          currentTextContentHash,
-          numberRange,
-        ])
-        this.textContentHashCache.length = Math.min(
-          this.textContentHashCache.length,
-          LIMITED_CACHE_SIZE,
-        )
+        this.textContentHashCache.set(currentTextContentHash, numberRange)
+        if (this.textContentHashCache.size > LIMITED_CACHE_SIZE) {
+          this.textContentHashCache.delete(
+            this.textContentHashCache.keys().next().value,
+          )
+        }
       }
     }
     else {
