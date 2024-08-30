@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.3
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Can not highlight on some file &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(e648c)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/e648cc9)
+- Update deps, require vscode 1.92.0 &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(59d12)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/59d126f)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.2...0.6.3)
+
 ## 0.6.2
 
 ### &nbsp;&nbsp;&nbsp;Features
