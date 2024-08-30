@@ -20,7 +20,7 @@ type RootNode = (
         candidate: string
       }
     }
-    nodes: Node[]
+    nodes?: Node[]
   }
   | {
     type: 'atrule'
@@ -31,7 +31,7 @@ type RootNode = (
         candidate: string
       }
     }
-    nodes: Node[]
+    nodes?: Node[]
   }
 )
 
@@ -71,7 +71,7 @@ function withHelperComment(value: string) {
 function generateCSS(root: RootNode): string {
   return `${root.type === 'rule' ? root.selector : `@${root.name} ${root.params}`} {\n${
     root.nodes
-      .map((node) => {
+      ?.map((node) => {
         if (node.type === 'decl') {
           return `  ${node.prop}: ${withHelperComment(node.value)};`
         }
