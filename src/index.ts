@@ -5,11 +5,13 @@ import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import type { Ref } from 'reactive-vscode'
 import {
+  computed,
   defineExtension,
   ref,
   useActiveTextEditor,
   useCommand,
   useDisposable,
+  useDocumentText,
   useEditorDecorations,
   useFsWatcher,
   watchEffect,
@@ -131,17 +133,20 @@ const { activate, deactivate } = defineExtension(async () => {
   if (!decorationList.some(i => i.checkContext()))
     return
 
-  const editor = useActiveTextEditor()
+  const textEditor = useActiveTextEditor()
+  const document = computed(() => textEditor.value?.document)
+  const text = useDocumentText(document)
+
   const decorationRange: Ref<vscode.Range[]> = ref([])
   useEditorDecorations(
-    editor,
+    textEditor,
     { textDecoration: 'none; border-bottom: 1px dashed;' },
     decorationRange,
   )
 
   const decorateAll = () => {
     for (const i of decorationList) {
-      const ranges = i.decorate(editor.value)
+      const ranges = i.decorate(textEditor.value, text.value)
       if (ranges)
         decorationRange.value = ranges
     }

@@ -123,11 +123,11 @@ export class DecorationV3 {
     logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
   }
 
-  decorate(openEditor?: vscode.TextEditor | null | undefined) {
+  decorate(openEditor?: vscode.TextEditor | null | undefined, editorText?: string) {
     if (!openEditor || !this.isFileMatched(openEditor.document.uri.fsPath))
       return
 
-    const text = openEditor.document.getText()
+    const text = editorText ?? openEditor.document.getText()
     const textHash = hash(text)
 
     let numberRange: Result[] = []

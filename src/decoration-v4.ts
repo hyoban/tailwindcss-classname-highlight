@@ -75,11 +75,11 @@ export class DecorationV4 {
     this.ig = ignore().add(gitignore)
   }
 
-  decorate(openEditor?: vscode.TextEditor | null | undefined) {
+  decorate(openEditor?: vscode.TextEditor | null | undefined, editorText?: string) {
     if (!openEditor || this.isFileIgnored(openEditor.document.fileName))
       return
 
-    const text = openEditor.document.getText()
+    const text = editorText ?? openEditor.document.getText()
 
     let crypto: typeof import('node:crypto') | undefined
     try {
