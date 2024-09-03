@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.4
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Detect editor text change &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(acb14)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/acb1466)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.3...0.6.4)
+
 ## 0.6.3
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
