@@ -147,8 +147,7 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorateAll = () => {
     for (const i of decorationList) {
       const ranges = i.decorate(textEditor.value, text.value)
-      if (ranges)
-        decorationRange.value = ranges
+      decorationRange.value = ranges ?? []
     }
   }
   watchEffect(() => {
