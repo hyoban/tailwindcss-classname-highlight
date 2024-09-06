@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.5
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Wrong decoration on non-project file &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(d67cd)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/d67cd4a)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.4...0.6.5)
+
 ## 0.6.4
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
