@@ -145,9 +145,15 @@ const { activate, deactivate } = defineExtension(async () => {
   )
 
   const decorateAll = () => {
+    let decorated = false
     for (const i of decorationList) {
       const ranges = i.decorate(textEditor.value, text.value)
-      decorationRange.value = ranges ?? []
+      if (!decorated) {
+        decorationRange.value = ranges ?? []
+      }
+      if (ranges && ranges.length > 0) {
+        decorated = true
+      }
     }
   }
   watchEffect(() => {
