@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.6
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Decorate not work for monorepo &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(36d64)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/36d645e)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.5...0.6.6)
+
 ## 0.6.5
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
