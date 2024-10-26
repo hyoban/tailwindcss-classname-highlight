@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.7
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Update match include regex &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(89b92)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/89b92b4)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.6...0.6.7)
+
 ## 0.6.6
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
