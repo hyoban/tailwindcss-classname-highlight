@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.9
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Use jiti to import js config &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(a18bc)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/a18bcd3)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.8...0.6.9)
+
 ## 0.6.8
 
 ### &nbsp;&nbsp;&nbsp;Features
