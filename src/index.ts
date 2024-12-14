@@ -130,6 +130,10 @@ const { activate, deactivate } = defineExtension(async () => {
         ),
     )
 
+  for (const i of decorationList) {
+    await i.updateTailwindContext()
+  }
+
   if (!decorationList.some(i => i.checkContext()))
     return
 
@@ -160,9 +164,10 @@ const { activate, deactivate } = defineExtension(async () => {
     decorateAll()
   })
 
-  const onReload = () => {
-    for (const i of decorationList)
-      i.updateTailwindContext()
+  const onReload = async () => {
+    for (const i of decorationList) {
+      await i.updateTailwindContext()
+    }
 
     decorateAll()
   }

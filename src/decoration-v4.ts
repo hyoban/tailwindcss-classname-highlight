@@ -1,5 +1,7 @@
 import fs from 'node:fs'
+import fsp from 'node:fs/promises'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import type { Ignore } from 'ignore'
 import ignore from 'ignore'
@@ -7,6 +9,7 @@ import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
 import { defaultExtractor } from './default-extractor'
+import { resolveCssFrom, resolveJsFrom } from './resolve'
 import { logger, useWorkspaceFsPath } from './state'
 import { defaultIdeMatchInclude } from './utils'
 
@@ -26,20 +29,9 @@ export class DecorationV4 {
   constructor(
     private tailwindLibPath: string,
     private cssPath: string,
-  ) {
-    try {
-      this.updateTailwindContext()
-    }
-    catch (error) {
-      if (error instanceof Error) {
-        logger.appendLine(
-          `Error updating Tailwind CSS context${error.message}`,
-        )
-      }
-    }
-  }
+  ) {}
 
-  updateTailwindContext() {
+  async updateTailwindContext() {
     const now = Date.now()
     logger.appendLine('Updating Tailwind CSS context')
 
@@ -57,7 +49,62 @@ export class DecorationV4 {
       `Loading css from ${presetThemePath} and ${this.cssPath}`,
     )
     const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
-    this.tailwindContext = __unstable__loadDesignSystem(css)
+
+    const entryPoint = this.cssPath
+    const importBasePath = path.dirname(entryPoint)
+
+    this.tailwindContext = await __unstable__loadDesignSystem(
+      css,
+      {
+        base: importBasePath,
+
+        // v4.0.0-alpha.25+
+        loadModule: createLoader({
+          legacy: false,
+          filepath: entryPoint,
+          onError: (id, err, resourceType) => {
+            console.error(`Unable to load ${resourceType}: ${id}`, err)
+
+            if (resourceType === 'config') {
+              return {}
+            }
+            else if (resourceType === 'plugin') {
+              return () => {}
+            }
+          },
+        }),
+
+        loadStylesheet: async (id: string, base: string) => {
+          const resolved = resolveCssFrom(base, id)
+
+          return {
+            base: path.dirname(resolved),
+            content: await fsp.readFile(resolved, 'utf-8'),
+          }
+        },
+
+        // v4.0.0-alpha.24 and below
+        loadPlugin: createLoader({
+          legacy: true,
+          filepath: entryPoint,
+          onError(id, err) {
+            console.error(`Unable to load plugin: ${id}`, err)
+
+            return () => {}
+          },
+        }),
+
+        loadConfig: createLoader({
+          legacy: true,
+          filepath: entryPoint,
+          onError(id, err) {
+            console.error(`Unable to load config: ${id}`, err)
+
+            return {}
+          },
+        }),
+      },
+    )
     this.textContentHashCache.clear()
 
     logger.appendLine(
@@ -207,4 +254,45 @@ export class DecorationV4 {
 
     return true
   }
+}
+
+/**
+ * Create a loader function that can load plugins and config files relative to
+ * the CSS file that uses them. However, we don't want missing files to prevent
+ * everything from working so we'll let the error handler decide how to proceed.
+ */
+function createLoader<T>({
+  legacy,
+  filepath,
+  onError,
+}: {
+  legacy: boolean
+  filepath: string
+  onError: (id: string, error: unknown, resourceType: string) => T
+}) {
+  const cacheKey = `${+Date.now()}`
+
+  async function loadFile(id: string, base: string, resourceType: string) {
+    try {
+      const resolved = resolveJsFrom(base, id)
+
+      const url = pathToFileURL(resolved)
+      url.searchParams.append('t', cacheKey)
+
+      return await import(url.href).then(m => m.default ?? m)
+    }
+    catch (err) {
+      return onError(id, err, resourceType)
+    }
+  }
+
+  if (legacy) {
+    const baseDir = path.dirname(filepath)
+    return (id: string) => loadFile(id, baseDir, 'module')
+  }
+
+  return async (id: string, base: string, resourceType: string) => ({
+    base,
+    module: await loadFile(id, base, resourceType),
+  })
 }
