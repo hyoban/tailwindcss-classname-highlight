@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.8
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Support tailwind v4 beta, close #32 &nbsp;-&nbsp; by **Stephen Zhou** in https://github.com/hyoban/tailwindcss-classname-highlight/issues/32 [<samp>(d8aae)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/d8aaeca)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.7...0.6.8)
+
 ## 0.6.7
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
