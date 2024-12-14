@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 
 import type { Ignore } from 'ignore'
 import ignore from 'ignore'
+import { createJiti } from 'jiti'
 import { resolveModule } from 'local-pkg'
 import * as vscode from 'vscode'
 
@@ -279,7 +280,9 @@ function createLoader<T>({
       const url = pathToFileURL(resolved)
       url.searchParams.append('t', cacheKey)
 
-      return await import(url.href).then(m => m.default ?? m)
+      // return await import(url.href).then(m => m.default ?? m)
+      const jiti = createJiti(base)
+      return await jiti.import(url.href)
     }
     catch (err) {
       return onError(id, err, resourceType)
