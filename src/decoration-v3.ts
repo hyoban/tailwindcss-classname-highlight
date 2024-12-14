@@ -141,7 +141,9 @@ export class DecorationV3 {
         numberRange = this.extract(text)
         this.resultCache.set(textHash, numberRange)
         if (this.resultCache.size > LIMITED_CACHE_SIZE) {
-          this.resultCache.delete(this.resultCache.keys().next().value)
+          const { value } = this.resultCache.keys().next()
+          if (value)
+            this.resultCache.delete(value)
         }
       }
     }

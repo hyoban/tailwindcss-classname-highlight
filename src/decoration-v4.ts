@@ -152,9 +152,10 @@ export class DecorationV4 {
         numberRange = this.extract(text)
         this.textContentHashCache.set(currentTextContentHash, numberRange)
         if (this.textContentHashCache.size > LIMITED_CACHE_SIZE) {
-          this.textContentHashCache.delete(
-            this.textContentHashCache.keys().next().value,
-          )
+          const { value } = this.textContentHashCache.keys().next()
+          if (value) {
+            this.textContentHashCache.delete(value)
+          }
         }
       }
     }
