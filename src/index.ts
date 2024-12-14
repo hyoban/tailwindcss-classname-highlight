@@ -54,7 +54,7 @@ const { activate, deactivate } = defineExtension(async () => {
   )
   if (
     (!workspaceTailwindPackageInfo?.version
-    || !workspaceTailwindPackageInfo?.rootPath)
+      || !workspaceTailwindPackageInfo?.rootPath)
     && tailwindV3ConfigPaths.length === 0
   ) {
     logger.appendLine('Tailwind CSS package not found')
@@ -123,12 +123,12 @@ const { activate, deactivate } = defineExtension(async () => {
         ),
       ]
     : tailwindV3PackageEntries.map(
-      (tailwindcssPackageEntry, index) =>
-        new DecorationV3(
-          path.resolve(tailwindcssPackageEntry, '../../'),
-          tailwindConfigPath.at(index)!,
-        ),
-    )
+        (tailwindcssPackageEntry, index) =>
+          new DecorationV3(
+            path.resolve(tailwindcssPackageEntry, '../../'),
+            tailwindConfigPath.at(index)!,
+          ),
+      )
 
   for (const i of decorationList) {
     await i.updateTailwindContext()

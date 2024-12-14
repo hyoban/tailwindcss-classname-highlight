@@ -64,7 +64,7 @@ export function nestedBrackets(open, close, depth = 1) {
       : any([
           `[^${escape(open)}${escape(close)}s]*`,
           nestedBrackets(open, close, depth - 1),
-      ]),
+        ]),
     /\S*/,
     escape(close),
   ])
