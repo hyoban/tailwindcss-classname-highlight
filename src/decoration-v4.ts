@@ -34,9 +34,7 @@ export class DecorationV4 {
     const workspaceFsPath = useWorkspaceFsPath()
     const entryPoint = this.cssPath
 
-    await this.tailwindUtils.loadConfig(entryPoint, {
-      pwd: workspaceFsPath.value,
-    })
+    await this.tailwindUtils.loadConfig(entryPoint)
     this.textContentHashCache.clear()
 
     logger.appendLine(

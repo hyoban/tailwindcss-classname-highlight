@@ -4,7 +4,7 @@ import micromatch from 'micromatch'
 import { TailwindUtils } from 'tailwind-api-utils'
 import * as vscode from 'vscode'
 
-import { logger, useWorkspaceFsPath } from './state'
+import { logger } from './state'
 import { defaultIdeMatchInclude, hash } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
@@ -111,13 +111,7 @@ export class DecorationV3 {
 
     delete require.cache[require.resolve(this.tailwindConfigPath)]
 
-    const workspaceFsPath = useWorkspaceFsPath()
-    await this.tailwindUtils.loadConfig(
-      this.tailwindConfigPath,
-      {
-        pwd: workspaceFsPath.value,
-      },
-    )
+    await this.tailwindUtils.loadConfig(this.tailwindConfigPath)
     this.resultCache.clear()
 
     logger.appendLine(`Tailwind CSS context updated in ${Date.now() - now}ms`)
