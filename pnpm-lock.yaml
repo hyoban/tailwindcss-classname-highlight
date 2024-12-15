@@ -56,6 +56,9 @@ importers:
       sucrase:
         specifier: ^3.35.0
         version: 3.35.0
+      tailwind-api-utils:
+        specifier: ^0.0.9
+        version: 0.0.9(tailwindcss@3.4.4)
       tsup:
         specifier: ^8.3.5
         version: 8.3.5(jiti@2.4.1)(postcss@8.4.38)(tsx@4.19.0)(typescript@5.7.2)(yaml@2.4.5)
@@ -3635,6 +3638,11 @@ packages:
   synckit@0.9.2:
     resolution: {integrity: sha512-vrozgXDQwYO72vHjUb/HnFbQx1exDjoKzqx23aXEg2a9VIg2TSFZ8FmeZpTjUCFMYw7mpX4BE2SFu8wI7asYsw==}
     engines: {node: ^14.18.0 || >=16.0.0}
+
+  tailwind-api-utils@0.0.9:
+    resolution: {integrity: sha512-1c9DFX6BQwdU+RArOhA9pryFgo/aanuNQEpXKwgcAJXoT7n8UcwrnTgd9nd+3tsFcm/iIENj58mjFii7+LKPew==}
+    peerDependencies:
+      tailwindcss: ^3.0.0 || ^4.0.0 || ^4.0.0-beta
 
   tailwindcss@3.4.4:
     resolution: {integrity: sha512-ZoyXOdJjISB7/BcLTR6SEsLgKtDStYyYZVLsUtWChO4Ps20CBad7lfJKVDiejocV4ME1hLmyY0WJE3hSDcmQ2A==}
@@ -7917,6 +7925,13 @@ snapshots:
     dependencies:
       '@pkgr/core': 0.1.1
       tslib: 2.8.1
+
+  tailwind-api-utils@0.0.9(tailwindcss@3.4.4):
+    dependencies:
+      enhanced-resolve: 5.17.1
+      jiti: 2.4.1
+      local-pkg: 0.5.1
+      tailwindcss: 3.4.4
 
   tailwindcss@3.4.4:
     dependencies:

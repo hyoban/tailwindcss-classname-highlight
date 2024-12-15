@@ -1,11 +1,10 @@
 import path from 'node:path'
 
 import micromatch from 'micromatch'
+import { TailwindUtils } from 'tailwind-api-utils'
 import * as vscode from 'vscode'
 
-import { defaultExtractor } from './default-extractor'
-import { loadConfig } from './load-config'
-import { logger } from './state'
+import { logger, useWorkspaceFsPath } from './state'
 import { defaultIdeMatchInclude, hash } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
@@ -88,7 +87,7 @@ interface Result {
 }
 
 export class DecorationV3 {
-  tailwindContext: any
+  tailwindUtils: TailwindUtils = new TailwindUtils()
 
   resultCache = new Map<string, Result[]>()
 
@@ -106,17 +105,18 @@ export class DecorationV3 {
     }
   }
 
-  updateTailwindContext() {
+  async updateTailwindContext() {
     const now = Date.now()
     logger.appendLine('Updating Tailwind CSS context')
 
     delete require.cache[require.resolve(this.tailwindConfigPath)]
-    const { createContext } = require(
-      `${this.tailwindLibPath}/lib/lib/setupContextUtils.js`,
-    )
-    const resolveConfig = require(`${this.tailwindLibPath}/resolveConfig.js`)
-    this.tailwindContext = createContext(
-      resolveConfig(loadConfig(this.tailwindConfigPath)),
+
+    const workspaceFsPath = useWorkspaceFsPath()
+    await this.tailwindUtils.loadConfig(
+      this.tailwindConfigPath,
+      {
+        pwd: workspaceFsPath.value,
+      },
     )
     this.resultCache.clear()
 
@@ -195,7 +195,7 @@ export class DecorationV3 {
       path.dirname(this.tailwindConfigPath),
       filePath,
     )
-    const contentFilesPath = this.tailwindContext?.tailwindConfig?.content?.files ?? ([] as string[])
+    const contentFilesPath = this.tailwindUtils.context?.tailwindConfig?.content?.files ?? ([] as string[])
     return micromatch.isMatch(relativeFilePath, contentFilesPath)
   }
 
@@ -212,9 +212,7 @@ export class DecorationV3 {
     }
 
     const { generateRules } = require(`${this.tailwindLibPath}/lib/lib/generateRules.js`)
-    const extracted = defaultExtractor(
-      this.tailwindContext.tailwindConfig.separator,
-    )(
+    const extracted = this.tailwindUtils.extract(
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
       /@apply[^;]*;/.test(text)
@@ -223,7 +221,7 @@ export class DecorationV3 {
     ) as string[]
     const generatedRules = generateRules(
       extracted,
-      this.tailwindContext,
+      this.tailwindUtils.context,
     ) as GenerateRules
 
     const generatedRuleMap = new Map<string, GenerateRules>()
@@ -262,7 +260,7 @@ export class DecorationV3 {
       return false
     }
 
-    if (!this.tailwindContext) {
+    if (!this.tailwindUtils.context) {
       logger.appendLine(`${CHECK_CONTEXT_MESSAGE_PREFIX}Tailwind CSS context not found`)
       return false
     }

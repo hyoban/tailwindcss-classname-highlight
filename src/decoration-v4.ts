@@ -3,11 +3,9 @@ import path from 'node:path'
 
 import type { Ignore } from 'ignore'
 import ignore from 'ignore'
-import { resolveModule } from 'local-pkg'
+import { TailwindUtils } from 'tailwind-api-utils'
 import * as vscode from 'vscode'
 
-import { loadModule, loadStylesheet } from './compile'
-import { defaultExtractor } from './default-extractor'
 import { logger, useWorkspaceFsPath } from './state'
 import { defaultIdeMatchInclude } from './utils'
 
@@ -19,7 +17,7 @@ interface NumberRange {
 }
 
 export class DecorationV4 {
-  tailwindContext: any
+  tailwindUtils = new TailwindUtils()
   textContentHashCache = new Map<string, NumberRange[]>()
 
   ig: Ignore | undefined
@@ -33,36 +31,12 @@ export class DecorationV4 {
     const now = Date.now()
     logger.appendLine('Updating Tailwind CSS context')
 
-    const { __unstable__loadDesignSystem } = require(this.tailwindLibPath)
     const workspaceFsPath = useWorkspaceFsPath()
-    const presetThemePath = resolveModule('tailwindcss/theme.css', {
-      paths: [workspaceFsPath.value],
-    })
-    if (!presetThemePath) {
-      logger.appendLine('Preset theme not found')
-      return
-    }
-
-    logger.appendLine(
-      `Loading css from ${presetThemePath} and ${this.cssPath}`,
-    )
-    const css = `${fs.readFileSync(presetThemePath, 'utf8')}\n${fs.readFileSync(this.cssPath, 'utf8')}`
-
     const entryPoint = this.cssPath
-    const importBasePath = path.dirname(entryPoint)
 
-    this.tailwindContext = await __unstable__loadDesignSystem(
-      css,
-      {
-        base: importBasePath,
-        async loadModule(id: any, base: any) {
-          return loadModule(id, base, () => {})
-        },
-        async loadStylesheet(id: any, base: any) {
-          return loadStylesheet(id, base, () => {})
-        },
-      },
-    )
+    await this.tailwindUtils.loadConfig(entryPoint, {
+      pwd: workspaceFsPath.value,
+    })
     this.textContentHashCache.clear()
 
     logger.appendLine(
@@ -163,17 +137,15 @@ export class DecorationV4 {
       }
     }
 
-    const extracted = defaultExtractor(':')(
+    const extracted = this.tailwindUtils.extract(
       // rewrite @apply border-border; -> @apply border-border ;
       // add space before the final semicolon
       /@apply[^;]*;/.test(text)
         ? text.replaceAll(/(@apply[^;]*)(;)/g, '$1 ;')
         : text,
-    ) as string[]
+    )
 
-    const generatedRules = this.tailwindContext.candidatesToCss(
-      extracted,
-    ) as Array<string | null>
+    const generatedRules = this.tailwindUtils.context!.candidatesToCss(extracted)
     const generatedCandidates = new Set(
       extracted.filter((_, i) => generatedRules[i]),
     )
@@ -204,7 +176,7 @@ export class DecorationV4 {
       return false
     }
 
-    if (!this.tailwindContext) {
+    if (!this.tailwindUtils.context) {
       logger.appendLine(
         'Tailwind context not found, this extension will not work',
       )
