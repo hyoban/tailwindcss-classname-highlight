@@ -3,7 +3,7 @@
   "name": "tailwindcss-classname-highlight",
   "displayName": "Tailwind CSS ClassName Highlight",
   "type": "commonjs",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "description": "",
@@ -44,6 +44,12 @@
           "default": false,
           "title": "Enable Hover Provider",
           "description": "You may need to disable Hovers provided by Tailwind CSS IntelliSense."
+        },
+        "tailwindcss-classname-highlight.highlightCss": {
+          "type": "string",
+          "default": "border-bottom: 1px dashed;",
+          "title": "Highlight CSS",
+          "description": "Custom CSS to be applied to highlighted TailwindCSS classes"
         }
       }
     }

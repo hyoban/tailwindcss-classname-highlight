@@ -144,7 +144,7 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationRange: Ref<vscode.Range[]> = ref([])
   useEditorDecorations(
     textEditor,
-    { textDecoration: 'none; border-bottom: 1px dashed;' },
+    { textDecoration: `none; ${vscode.workspace.getConfiguration('tailwindcss-classname-highlight')['highlightCss']}` },
     decorationRange,
   )
 
