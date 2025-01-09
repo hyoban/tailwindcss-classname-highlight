@@ -44,6 +44,12 @@
           "default": false,
           "title": "Enable Hover Provider",
           "description": "You may need to disable Hovers provided by Tailwind CSS IntelliSense."
+        },
+        "tailwindcss-classname-highlight.textDecoration": {
+          "type": "string",
+          "default": "none; border-bottom: 1px dashed;",
+          "title": "Text Decoration",
+          "description": "Text Decoration to be applied to highlighted TailwindCSS classes"
         }
       }
     }
