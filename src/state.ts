@@ -1,9 +1,13 @@
 import { computed, defineConfigs, defineLogger, useWorkspaceFolders } from 'reactive-vscode'
 
-export const { enableHoverProvider } = defineConfigs(
+export const {
+  enableHoverProvider,
+  textDecoration,
+} = defineConfigs(
   'tailwindcss-classname-highlight',
   {
     enableHoverProvider: Boolean,
+    textDecoration: String,
   },
 )
 

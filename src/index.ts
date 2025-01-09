@@ -21,7 +21,7 @@ import * as vscode from 'vscode'
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
-import { logger, useWorkspaceFsPath } from './state'
+import { logger, textDecoration, useWorkspaceFsPath } from './state'
 
 const { activate, deactivate } = defineExtension(async () => {
   const workspaceFsPath = useWorkspaceFsPath()
@@ -144,7 +144,7 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationRange: Ref<vscode.Range[]> = ref([])
   useEditorDecorations(
     textEditor,
-    { textDecoration: vscode.workspace.getConfiguration('tailwindcss-classname-highlight')['textDecoration'] },
+    { textDecoration: textDecoration.value },
     decorationRange,
   )
 
