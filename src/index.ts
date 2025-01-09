@@ -100,10 +100,10 @@ const { activate, deactivate } = defineExtension(async () => {
       .filter((p) => {
         const content = fs.readFileSync(p, 'utf8')
         const tailwindCSSRegex = [
-          /^@import (["'])tailwindcss\1;/,
-          /^@import (["'])tailwindcss\/preflight\1/,
-          /^@import (["'])tailwindcss\/utilities\1/,
-          /^@import (["'])tailwindcss\/theme\1/,
+          /^@import (["'])tailwindcss\1.+/,
+          /^@import (["'])tailwindcss\/preflight\1.+/,
+          /^@import (["'])tailwindcss\/utilities\1.+/,
+          /^@import (["'])tailwindcss\/theme\1.+/,
         ]
         return tailwindCSSRegex.some(regex => regex.test(content))
       })
