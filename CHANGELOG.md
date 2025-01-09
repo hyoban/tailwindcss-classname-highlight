@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.10
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Add customization of the rendered highlight through a custom CSS setting &nbsp;-&nbsp; by **JamesHyot** in https://github.com/hyoban/tailwindcss-classname-highlight/issues/33 [<samp>(ba406)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/ba4060a)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.9...0.6.10)
+
 ## 0.6.9
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
