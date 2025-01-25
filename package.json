@@ -3,7 +3,7 @@
   "name": "tailwindcss-classname-highlight",
   "displayName": "Tailwind CSS ClassName Highlight",
   "type": "commonjs",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "private": true,
   "packageManager": "pnpm@9.15.3",
   "description": "",

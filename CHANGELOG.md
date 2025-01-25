@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.11
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Correct negative pattern match &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(9e9fe)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/9e9fe14)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.10...0.6.11)
+
 ## 0.6.10
 
 ### &nbsp;&nbsp;&nbsp;Features
