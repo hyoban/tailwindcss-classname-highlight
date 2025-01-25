@@ -190,7 +190,11 @@ export class DecorationV3 {
       filePath,
     )
     const contentFilesPath = this.tailwindUtils.context?.tailwindConfig?.content?.files ?? ([] as string[])
-    return micromatch.isMatch(relativeFilePath, contentFilesPath)
+    const positiveContentFilesPath = contentFilesPath.filter(i => !i.startsWith('!'))
+    const negativeContentFilesPath = contentFilesPath.filter(i => i.startsWith('!')).map(i => i.slice(1))
+
+    return micromatch.isMatch(relativeFilePath, positiveContentFilesPath)
+      && !micromatch.isMatch(relativeFilePath, negativeContentFilesPath)
   }
 
   private extract(text: string) {
@@ -212,7 +216,7 @@ export class DecorationV3 {
       /@apply[^;]*;/.test(text)
         ? text.replaceAll(/(@apply[^;]*)(;)/g, '$1 ;')
         : text,
-    ) as string[]
+    )
     const generatedRules = generateRules(
       extracted,
       this.tailwindUtils.context,
