@@ -115,6 +115,9 @@ const { activate, deactivate } = defineExtension(async () => {
     cssFilePath = configPath.at(0)!
   }
 
+  // for nativewind preset
+  process.env.TAILWIND_MODE = 'build'
+
   const decorationList = isV4
     ? [
         new DecorationV4(
