@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.12
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Support nativewind preset &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(5e0eb)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/5e0eb7f)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.11...0.6.12)
+
 ## 0.6.11
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
