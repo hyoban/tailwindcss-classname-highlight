@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.13
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Update deps &nbsp;-&nbsp; by **Stephen Zhou** [<samp>(3f7e5)</samp>](https://github.com/hyoban/tailwindcss-classname-highlight/commit/3f7e5d5)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/hyoban/tailwindcss-classname-highlight/compare/v0.6.12...0.6.13)
+
 ## 0.6.12
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes
