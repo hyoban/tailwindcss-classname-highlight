@@ -17,7 +17,7 @@ interface NumberRange {
 }
 
 export class DecorationV4 {
-  tailwindUtils = new TailwindUtils()
+  tailwindUtils: TailwindUtils
   textContentHashCache = new Map<string, NumberRange[]>()
 
   ig: Ignore | undefined
@@ -25,7 +25,10 @@ export class DecorationV4 {
   constructor(
     private tailwindLibPath: string,
     private cssPath: string,
-  ) {}
+  ) {
+    const workspaceFsPath = useWorkspaceFsPath()
+    this.tailwindUtils = new TailwindUtils({ paths: [workspaceFsPath.value] })
+  }
 
   async updateTailwindContext() {
     const now = Date.now()

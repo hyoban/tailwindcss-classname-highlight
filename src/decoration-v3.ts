@@ -4,7 +4,7 @@ import micromatch from 'micromatch'
 import { TailwindUtils } from 'tailwind-api-utils'
 import * as vscode from 'vscode'
 
-import { logger } from './state'
+import { logger, useWorkspaceFsPath } from './state'
 import { defaultIdeMatchInclude, hash } from './utils'
 
 const CHECK_CONTEXT_MESSAGE_PREFIX = 'Check context failed: '
@@ -87,7 +87,7 @@ interface Result {
 }
 
 export class DecorationV3 {
-  tailwindUtils: TailwindUtils = new TailwindUtils()
+  tailwindUtils: TailwindUtils
 
   resultCache = new Map<string, Result[]>()
 
@@ -95,6 +95,8 @@ export class DecorationV3 {
     private tailwindLibPath: string,
     private tailwindConfigPath: string,
   ) {
+    const workspaceFsPath = useWorkspaceFsPath()
+    this.tailwindUtils = new TailwindUtils({ paths: [workspaceFsPath.value] })
     try {
       this.updateTailwindContext()
     }
