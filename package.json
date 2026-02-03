@@ -22,6 +22,12 @@
   ],
   "main": "./dist/index.js",
   "icon": "res/icon.png",
+  "files": [
+    "LICENSE.md",
+    "dist/*",
+    "res/*",
+    "CHANGELOG.md"
+  ],
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -59,8 +65,8 @@
     "dev": "pnpm build --watch",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "pack": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies",
+    "package": "vsce package --no-dependencies",
+    "release": "bumpp",
     "test": "vitest",
     "typecheck": "tsc",
     "vscode:prepublish": "pnpm build"
@@ -70,21 +76,29 @@
     "@types/node": "^22.15.31",
     "@types/vscode": "1.100.0",
     "@vscode/vsce": "^3.5.0",
+    "bumpp": "^10.4.0",
     "enhanced-resolve": "^5.18.1",
     "eslint": "^9.28.0",
     "eslint-config-hyoban": "^4.0.8",
     "fast-glob": "^3.3.3",
     "ignore": "^7.0.5",
     "jiti": "^2.4.2",
+    "lint-staged": "^16.2.7",
     "local-pkg": "^1.1.1",
     "micromatch": "^4.0.8",
     "reactive-vscode": "0.2.19",
-    "release-it": "19.0.3",
-    "release-it-pnpm": "^4.6.6",
+    "simple-git-hooks": "^2.13.1",
     "sucrase": "^3.35.0",
     "tailwind-api-utils": "^1.0.3",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.3",
+    "vsxpub": "^0.1.3"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "pnpm run lint && pnpm run typecheck"
   }
 }
