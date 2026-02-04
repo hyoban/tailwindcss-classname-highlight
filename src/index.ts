@@ -13,7 +13,7 @@ import {
   useDisposable,
   useDocumentText,
   useEditorDecorations,
-  useFsWatcher,
+  useFileSystemWatcher,
   watchEffect,
 } from 'reactive-vscode'
 import * as vscode from 'vscode'
@@ -147,7 +147,7 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationRange: Ref<vscode.Range[]> = ref([])
   useEditorDecorations(
     textEditor,
-    { textDecoration: textDecoration.value },
+    { textDecoration: textDecoration },
     decorationRange,
   )
 
@@ -177,7 +177,7 @@ const { activate, deactivate } = defineExtension(async () => {
 
   const fileWatcherList = [...tailwindConfigPath, cssFilePath].filter(Boolean)
   for (const file of fileWatcherList) {
-    const fileWatcher = useFsWatcher(file)
+    const fileWatcher = useFileSystemWatcher(file)
     fileWatcher.onDidChange(onReload)
   }
 

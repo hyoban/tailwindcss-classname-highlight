@@ -11,7 +11,7 @@ export class GeneratedCSSHoverProvider implements vscode.HoverProvider {
     document: vscode.TextDocument,
     position: vscode.Position,
   ): Promise<vscode.Hover | undefined> {
-    if (!enableHoverProvider.value)
+    if (!enableHoverProvider)
       return
     return this.decoration.hover(document, position)
   }
