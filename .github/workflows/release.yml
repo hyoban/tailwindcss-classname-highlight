@@ -5,7 +5,9 @@ permissions:
   id-token: write
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   release:
