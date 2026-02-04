@@ -1,9 +1,6 @@
 import { computed, defineConfig, defineLogger, useWorkspaceFolders } from 'reactive-vscode'
 
-export const {
-  enableHoverProvider,
-  textDecoration,
-} = defineConfig<{
+export const config = defineConfig<{
   enableHoverProvider: boolean
   textDecoration: string
 }>(

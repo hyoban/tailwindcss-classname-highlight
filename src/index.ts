@@ -5,7 +5,6 @@ import fg from 'fast-glob'
 import { getPackageInfo, resolveModule } from 'local-pkg'
 import type { Ref } from 'reactive-vscode'
 import {
-  computed,
   defineExtension,
   ref,
   useActiveTextEditor,
@@ -21,7 +20,7 @@ import * as vscode from 'vscode'
 import { DecorationV3 } from './decoration-v3'
 import { DecorationV4 } from './decoration-v4'
 import { GeneratedCSSHoverProvider } from './hover-provider'
-import { logger, textDecoration, useWorkspaceFsPath } from './state'
+import { config, logger, useWorkspaceFsPath } from './state'
 
 const { activate, deactivate } = defineExtension(async () => {
   const workspaceFsPath = useWorkspaceFsPath()
@@ -140,26 +139,26 @@ const { activate, deactivate } = defineExtension(async () => {
   if (!decorationList.some(i => i.checkContext()))
     return
 
-  const textEditor = useActiveTextEditor()
-  const document = computed(() => textEditor.value?.document)
-  const text = useDocumentText(document)
+  const editor = useActiveTextEditor()
+  const text = useDocumentText(() => editor.value?.document)
 
   const decorationRange: Ref<vscode.Range[]> = ref([])
-  useEditorDecorations(
-    textEditor,
-    { textDecoration },
+  const { update } = useEditorDecorations(
+    editor,
+    { textDecoration: config.textDecoration },
     decorationRange,
   )
 
   const decorateAll = () => {
     let decorated = false
     for (const i of decorationList) {
-      const ranges = i.decorate(textEditor.value, text.value)
+      const ranges = i.decorate(editor.value, text.value)
       if (!decorated) {
         decorationRange.value = ranges ?? []
       }
       if (ranges && ranges.length > 0) {
         decorated = true
+        update()
       }
     }
   }
