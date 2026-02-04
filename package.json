@@ -1,7 +1,7 @@
 {
   "name": "tailwindcss-classname-highlight",
   "displayName": "Tailwind CSS ClassName Highlight",
-  "version": "0.6.17",
+  "version": "0.6.18",
   "private": true,
   "description": "VSCode extension to highlight TailwindCSS classnames in the editor.",
   "categories": [
