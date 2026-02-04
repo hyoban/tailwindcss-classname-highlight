@@ -1,39 +1,41 @@
 {
-  "publisher": "hyoban",
   "name": "tailwindcss-classname-highlight",
   "displayName": "Tailwind CSS ClassName Highlight",
-  "type": "commonjs",
   "version": "0.6.15",
   "private": true,
-  "packageManager": "pnpm@10.28.2",
-  "description": "",
-  "author": "Stephen Zhou <hi@hyoban.cc>",
-  "license": "MIT",
+  "description": "VSCode extension to highlight TailwindCSS classnames in the editor.",
+  "categories": [
+    "Other"
+  ],
   "homepage": "https://github.com/hyoban/tailwindcss-classname-highlight#readme",
+  "bugs": {
+    "url": "https://github.com/hyoban/tailwindcss-classname-highlight/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/hyoban/tailwindcss-classname-highlight"
   },
-  "bugs": {
-    "url": "https://github.com/hyoban/tailwindcss-classname-highlight/issues"
-  },
-  "categories": [
-    "Other"
-  ],
+  "license": "MIT",
+  "author": "Stephen Zhou <hi@hyoban.cc>",
+  "publisher": "hyoban",
+  "type": "commonjs",
   "main": "./dist/index.js",
-  "icon": "res/icon.png",
   "files": [
-    "LICENSE.md",
     "dist/*",
     "res/*",
     "CHANGELOG.md"
   ],
-  "engines": {
-    "vscode": "^1.100.0"
+  "scripts": {
+    "build": "tsup src/index.ts --external vscode",
+    "dev": "pnpm build --watch",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "package": "vsce package --no-dependencies",
+    "release": "bumpp",
+    "test": "vitest",
+    "typecheck": "tsc",
+    "vscode:prepublish": "pnpm build"
   },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
   "contributes": {
     "commands": [
       {
@@ -60,16 +62,14 @@
       }
     }
   },
-  "scripts": {
-    "build": "tsup src/index.ts --external vscode",
-    "dev": "pnpm build --watch",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "package": "vsce package --no-dependencies",
-    "release": "bumpp",
-    "test": "vitest",
-    "typecheck": "tsc",
-    "vscode:prepublish": "pnpm build"
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "pnpm run lint && pnpm run typecheck"
   },
   "devDependencies": {
     "@types/micromatch": "^4.0.10",
@@ -95,10 +95,9 @@
     "vitest": "^4.0.18",
     "vsxpub": "^0.1.3"
   },
-  "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "vscode": "^1.100.0"
   },
-  "lint-staged": {
-    "*": "pnpm run lint && pnpm run typecheck"
-  }
+  "icon": "res/icon.png"
 }
