@@ -4,9 +4,9 @@ export const {
   enableHoverProvider,
   textDecoration,
 } = defineConfig<{
-    enableHoverProvider: boolean,
-    textDecoration: string,
-  }>(
+  enableHoverProvider: boolean
+  textDecoration: string
+}>(
   'tailwindcss-classname-highlight',
 )
 

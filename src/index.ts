@@ -147,7 +147,7 @@ const { activate, deactivate } = defineExtension(async () => {
   const decorationRange: Ref<vscode.Range[]> = ref([])
   useEditorDecorations(
     textEditor,
-    { textDecoration: textDecoration },
+    { textDecoration },
     decorationRange,
   )
 
